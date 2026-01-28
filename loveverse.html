@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoveVerse – Craft Love Into Words</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Homemade+Apple&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-rose: #8B475D;
+            --color-rose-light: #B8859E;
+            --color-rose-dark: #5C2E3D;
+            --color-cream: #FFF8F3;
+            --color-parchment: #F5EDE4;
+            --color-ink: #2D2424;
+            --color-gold: #C9A572;
+            --color-gold-light: #E6D5B8;
+            
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-body: 'Crimson Pro', serif;
+            --font-script: 'Homemade Apple', cursive;
+            
+            --shadow-soft: 0 4px 20px rgba(139, 71, 93, 0.08);
+            --shadow-elevated: 0 10px 40px rgba(139, 71, 93, 0.15);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #FFF8F3 0%, #F5EDE4 50%, #FFEEF6 100%);
+            color: var(--color-ink);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Hearts */
+        .hearts-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.03;
+        }
+
+        @keyframes float-heart {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .heart-float {
+            position: absolute;
+            animation: float-heart 20s ease-in-out infinite;
+            font-size: 40px;
+            color: var(--color-rose);
+        }
+
+        #app {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem;
+            text-align: center;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo {
+            font-family: var(--font-script);
+            font-size: 3rem;
+            color: var(--color-rose);
+            text-shadow: 2px 2px 4px rgba(139, 71, 93, 0.1);
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-family: var(--font-serif);
+            font-size: 1.125rem;
+            color: var(--color-rose-light);
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        /* Landing Page */
+        .landing {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            text-align: center;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 4.5rem;
+            font-weight: 300;
+            line-height: 1.2;
+            color: var(--color-rose-dark);
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-subtitle {
+            font-size: 2rem;
+            color: var(--color-rose);
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            line-height: 1.4;
+            font-family: var(--font-serif);
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--color-ink);
+            opacity: 0.8;
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--color-rose) 0%, var(--color-rose-dark) 100%);
+            color: var(--color-cream);
+            padding: 1.25rem 3rem;
+            font-size: 1.25rem;
+            font-family: var(--font-serif);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-soft);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover:before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .no-account {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--color-rose-light);
+            font-style: italic;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+            text-align: left;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(139, 71, 93, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature h3 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--color-rose-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .feature p {
+            color: var(--color-ink);
+            opacity: 0.7;
+            line-height: 1.6;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            max-width: 1000px;
+            margin: 6rem auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            text-align: center;
+            color: var(--color-rose-dark);
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--color-rose);
+            font-size: 1.25rem;
+            margin-bottom: 4rem;
+            font-style: italic;
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 3rem;
+            position: relative;
+        }
+
+        .step-item {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-rose) 0%, var(--color-rose-dark) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .step-item h3 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--color-rose-dark);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .step-item p {
+            color: var(--color-ink);
+            opacity: 0.7;
+            line-height: 1.6;
+        }
+
+        /* Examples Section */
+        .examples-section {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 6rem 2rem;
+            margin: 4rem 0;
+        }
+
+        .examples-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .example-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(139, 71, 93, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .example-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .example-style {
+            font-family: var(--font-serif);
+            color: var(--color-rose);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .example-text {
+            font-family: var(--font-serif);
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--color-ink);
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .example-occasion {
+            font-size: 0.875rem;
+            color: var(--color-rose-light);
+            text-align: right;
+        }
+
+        /* Perfect For Section */
+        .perfect-for {
+            max-width: 900px;
+            margin: 6rem auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .occasions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .occasion-tag {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1.25rem 1.5rem;
+            border-radius: 15px;
+            border: 2px solid rgba(139, 71, 93, 0.15);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .occasion-tag:hover {
+            border-color: var(--color-rose);
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+        }
+
+        .occasion-icon {
+            margin-bottom: 0.5rem;
+        }
+
+        .occasion-name {
+            font-family: var(--font-serif);
+            font-size: 1.125rem;
+            color: var(--color-rose-dark);
+            font-weight: 500;
+        }
+
+        /* Final CTA Section */
+        .final-cta {
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .final-cta-title {
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            color: var(--color-rose-dark);
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            line-height: 1.3;
+        }
+
+        .final-cta-text {
+            font-size: 1.25rem;
+            color: var(--color-ink);
+            opacity: 0.8;
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+
+        /* Icon Styles */
+        .lucide-icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+
+        .feature-icon {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .feature-icon .lucide-icon {
+            width: 40px;
+            height: 40px;
+            color: var(--color-rose);
+        }
+
+        /* Poem Creator */
+        .poem-creator {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .step {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(139, 71, 93, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: var(--color-rose);
+            transform: scale(1.3);
+        }
+
+        .step.completed {
+            background: var(--color-rose-light);
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: var(--shadow-elevated);
+            border: 1px solid rgba(139, 71, 93, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-title {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            color: var(--color-rose-dark);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .form-subtitle {
+            text-align: center;
+            color: var(--color-rose);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-family: var(--font-serif);
+            font-size: 1.125rem;
+            color: var(--color-rose-dark);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid rgba(139, 71, 93, 0.15);
+            border-radius: 15px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--color-ink);
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-rose);
+            box-shadow: 0 0 0 3px rgba(139, 71, 93, 0.1);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.875rem;
+            color: var(--color-rose-light);
+            margin-top: 0.5rem;
+        }
+
+        /* Photo Upload */
+        .photo-upload {
+            border: 2px dashed rgba(139, 71, 93, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .photo-upload:hover {
+            border-color: var(--color-rose);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .photo-upload.has-image {
+            padding: 0;
+            border: none;
+        }
+
+        .photo-preview {
+            width: 100%;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+        .remove-photo {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: var(--color-rose-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .remove-photo:hover {
+            background: var(--color-rose);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Style Selection */
+        .styles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .style-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid rgba(139, 71, 93, 0.15);
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .style-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+            border-color: var(--color-rose-light);
+        }
+
+        .style-card.selected {
+            border-color: var(--color-rose);
+            background: rgba(139, 71, 93, 0.05);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .style-card.premium {
+            background: linear-gradient(135deg, rgba(201, 165, 114, 0.1), rgba(230, 213, 184, 0.1));
+        }
+
+        .premium-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--color-gold);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .style-name {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--color-rose-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .style-description {
+            font-size: 0.875rem;
+            color: var(--color-ink);
+            opacity: 0.7;
+            line-height: 1.4;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-family: var(--font-serif);
+            font-size: 1.125rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-rose) 0%, var(--color-rose-dark) 100%);
+            color: var(--color-cream);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-rose);
+            border: 2px solid var(--color-rose-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(139, 71, 93, 0.05);
+        }
+
+        /* Poem Display */
+        .poem-display {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .poem-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 4rem;
+            box-shadow: var(--shadow-elevated);
+            border: 1px solid rgba(139, 71, 93, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .poem-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--color-rose) 0%, var(--color-gold) 100%);
+        }
+
+        .poem-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(139, 71, 93, 0.1);
+        }
+
+        .poem-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--color-rose-light);
+            margin-bottom: 1rem;
+        }
+
+        .poem-for {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--color-rose);
+            font-style: italic;
+        }
+
+        .poem-text {
+            font-family: var(--font-serif);
+            font-size: 1.375rem;
+            line-height: 2;
+            color: var(--color-ink);
+            white-space: pre-wrap;
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: writeIn 2s ease-out;
+        }
+
+        @keyframes writeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .poem-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(139, 71, 93, 0.1);
+        }
+
+        .watermark {
+            font-family: var(--font-script);
+            color: var(--color-rose-light);
+            font-size: 0.875rem;
+        }
+
+        .poem-style-badge {
+            background: rgba(139, 71, 93, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: var(--color-rose-dark);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--color-rose-light);
+            padding: 0.875rem 1.75rem;
+            border-radius: 50px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--color-rose-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: var(--color-rose);
+            color: white;
+            border-color: var(--color-rose);
+            transform: translateY(-2px);
+        }
+
+        /* Loading State */
+        .generating {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .heart-loading {
+            font-size: 4rem;
+            color: var(--color-rose);
+            animation: heartbeat 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+        }
+
+        .generating-text {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--color-rose-dark);
+            margin-top: 2rem;
+            font-style: italic;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(45, 36, 36, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal {
+            background: var(--color-cream);
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-elevated);
+            animation: slideUp 0.4s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--color-rose-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--color-rose-dark);
+            transform: scale(1.1);
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            text-align: center;
+            color: var(--color-rose-dark);
+            margin-bottom: 1rem;
+        }
+
+        .modal-text {
+            text-align: center;
+            color: var(--color-ink);
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .modal-highlight {
+            background: rgba(139, 71, 93, 0.1);
+            padding: 1rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--color-rose);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.5rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .form-card {
+                padding: 2rem;
+            }
+
+            .poem-card {
+                padding: 2rem;
+            }
+
+            .poem-text {
+                font-size: 1.125rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .steps-container {
+                grid-template-columns: 1fr;
+            }
+
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .occasions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .final-cta-title {
+                font-size: 2rem;
+            }
+
+            .cta-button {
+                padding: 1rem 2rem;
+                font-size: 1.125rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-background">
+        <div class="heart-float" style="top: 10%; left: 10%; animation-delay: 0s;">♥</div>
+        <div class="heart-float" style="top: 20%; left: 80%; animation-delay: 2s;">♥</div>
+        <div class="heart-float" style="top: 60%; left: 15%; animation-delay: 4s;">♥</div>
+        <div class="heart-float" style="top: 70%; left: 85%; animation-delay: 6s;">♥</div>
+        <div class="heart-float" style="top: 40%; left: 50%; animation-delay: 3s;">♥</div>
+    </div>
+
+    <div id="app">
+        <header>
+            <div class="logo">LoveVerse</div>
+            <div class="tagline">Craft love into words, instantly</div>
+        </header>
+
+        <!-- Landing Page -->
+        <div v-if="currentView === 'landing'" class="landing">
+            <h1 class="hero-title">Love, written gently</h1>
+            <p class="hero-subtitle">Say it better. Say it from the heart.</p>
+            <p class="hero-description">
+                LoveVerse helps you turn feelings into words that feel warm, real, and unmistakably yours.
+            </p>
+            <button class="cta-button" @click="startCreating">Create Your Poem</button>
+            <p class="no-account">No account required • Free to start</p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i data-lucide="pen-line" class="lucide-icon"></i>
+                    </div>
+                    <h3>Effortlessly Personal</h3>
+                    <p>Just share a few details and let AI craft a unique poem that feels genuinely yours.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i data-lucide="sparkles" class="lucide-icon"></i>
+                    </div>
+                    <h3>Multiple Styles</h3>
+                    <p>Choose from romantic classics, playful verses, passionate sonnets, and more.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i data-lucide="image" class="lucide-icon"></i>
+                    </div>
+                    <h3>Photo Enhanced</h3>
+                    <p>Upload a photo to make your poem even more personal and meaningful.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i data-lucide="heart" class="lucide-icon"></i>
+                    </div>
+                    <h3>Share & Save</h3>
+                    <p>Download, copy, or share your poem instantly. Save forever with premium.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div v-if="currentView === 'landing'" class="how-it-works">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Three simple steps to your perfect poem</p>
+            
+            <div class="steps-container">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h3>Share Your Feelings</h3>
+                    <p>Tell us about someone special and what makes them unique to you.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h3>Choose Your Style</h3>
+                    <p>Pick from romantic, playful, passionate, or classic poetry styles.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h3>Receive Your Poem</h3>
+                    <p>Get a beautiful, personalized poem in seconds. Share, save, or treasure it forever.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples Section -->
+        <div v-if="currentView === 'landing'" class="examples-section">
+            <div class="examples-container">
+                <h2 class="section-title">Poems That Touch Hearts</h2>
+                <p class="section-subtitle">Real expressions, beautifully crafted</p>
+                
+                <div class="examples-grid">
+                    <div class="example-card">
+                        <div class="example-style">Classic Romance</div>
+                        <div class="example-text">
+                            "In morning light, your smile appears,<br>
+                            A gentle warmth that calms my fears.<br>
+                            Your laughter dances through the air,<br>
+                            A melody beyond compare."
+                        </div>
+                        <div class="example-occasion">— For an anniversary</div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-style">Playful & Light</div>
+                        <div class="example-text">
+                            "You steal the covers, hog the bed,<br>
+                            Leave coffee rings everywhere instead,<br>
+                            But when you laugh, my world turns bright,<br>
+                            And suddenly, everything's just right."
+                        </div>
+                        <div class="example-occasion">— For everyday love</div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-style">Passionate</div>
+                        <div class="example-text">
+                            "Your touch ignites a fire deep within,<br>
+                            A flame that burns beneath my skin.<br>
+                            In your eyes, I find my home,<br>
+                            With you, I'm never alone."
+                        </div>
+                        <div class="example-occasion">— For a special night</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Perfect For Section -->
+        <div v-if="currentView === 'landing'" class="perfect-for">
+            <h2 class="section-title">Perfect For Every Moment</h2>
+            <p class="section-subtitle">When you want to say something that matters</p>
+            
+            <div class="occasions-grid">
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="cake" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Anniversaries</div>
+                </div>
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="gift" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Birthdays</div>
+                </div>
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="heart-handshake" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Apologies</div>
+                </div>
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="sparkle" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Just Because</div>
+                </div>
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="ring" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Proposals</div>
+                </div>
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="sun" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Good Morning</div>
+                </div>
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="moon" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Good Night</div>
+                </div>
+                <div class="occasion-tag">
+                    <div class="occasion-icon">
+                        <i data-lucide="plane" class="lucide-icon" style="width: 28px; height: 28px; color: var(--color-rose);"></i>
+                    </div>
+                    <div class="occasion-name">Long Distance</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final CTA -->
+        <div v-if="currentView === 'landing'" class="final-cta">
+            <h2 class="final-cta-title">Ready to express what words can't quite capture?</h2>
+            <p class="final-cta-text">
+                Start creating poems that feel as special as the person you're writing them for.
+            </p>
+            <button class="cta-button" @click="startCreating">Create Your First Poem</button>
+            <p class="no-account">It takes less than a minute</p>
+        </div>
+
+        <!-- Poem Creator -->
+        <div v-if="currentView === 'create'" class="poem-creator">
+            <div class="step-indicator">
+                <div class="step" :class="{ active: step === 1, completed: step > 1 }"></div>
+                <div class="step" :class="{ active: step === 2, completed: step > 2 }"></div>
+                <div class="step" :class="{ active: step === 3, completed: step > 3 }"></div>
+            </div>
+
+            <!-- Step 1: Details -->
+            <div v-if="step === 1" class="form-card">
+                <h2 class="form-title">Who is this poem for?</h2>
+                <p class="form-subtitle">Tell us about someone special</p>
+
+                <div class="form-group">
+                    <label>Their Name (optional)</label>
+                    <input type="text" v-model="poemData.name" placeholder="Sarah" />
+                </div>
+
+                <div class="form-group">
+                    <label>What makes them special?</label>
+                    <textarea 
+                        v-model="poemData.description" 
+                        placeholder="Her laugh lights up every room. The way she sees beauty in small things. How she makes me want to be better..."
+                    ></textarea>
+                    <div class="char-counter">{{ poemData.description.length }} characters</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" @click="goBack">Back</button>
+                    <button class="btn btn-primary" @click="nextStep" :disabled="!poemData.description.trim()">
+                        Continue
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Photo -->
+            <div v-if="step === 2" class="form-card">
+                <h2 class="form-title">Add a photo?</h2>
+                <p class="form-subtitle">Optional, but makes it more personal</p>
+
+                <div class="form-group">
+                    <div 
+                        v-if="!poemData.photoPreview"
+                        class="photo-upload" 
+                        @click="triggerPhotoUpload"
+                    >
+                        <div style="margin-bottom: 1rem;">
+                            <i data-lucide="image-plus" style="width: 48px; height: 48px; color: var(--color-rose);"></i>
+                        </div>
+                        <p style="color: var(--color-rose); margin-bottom: 0.5rem;">Click to upload a photo</p>
+                        <p style="font-size: 0.875rem; opacity: 0.6;">JPG or PNG, max 5MB</p>
+                    </div>
+                    <div v-else class="photo-upload has-image">
+                        <div class="photo-preview">
+                            <img :src="poemData.photoPreview" alt="Preview" />
+                            <button class="remove-photo" @click="removePhoto">×</button>
+                        </div>
+                    </div>
+                    <input 
+                        type="file" 
+                        ref="photoInput" 
+                        accept="image/jpeg,image/png" 
+                        style="display: none;"
+                        @change="handlePhotoUpload"
+                    />
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" @click="prevStep">Back</button>
+                    <button class="btn btn-primary" @click="nextStep">
+                        {{ poemData.photoPreview ? 'Continue' : 'Skip for now' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Style -->
+            <div v-if="step === 3" class="form-card">
+                <h2 class="form-title">Choose your style</h2>
+                <p class="form-subtitle">Each style brings a different feeling</p>
+
+                <div class="styles-grid">
+                    <div 
+                        v-for="style in styles" 
+                        :key="style.id"
+                        class="style-card"
+                        :class="{ selected: poemData.style === style.id, premium: style.premium }"
+                        @click="selectStyle(style)"
+                    >
+                        <span v-if="style.premium" class="premium-badge">PREMIUM</span>
+                        <div class="style-name">{{ style.name }}</div>
+                        <div class="style-description">{{ style.description }}</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" @click="prevStep">Back</button>
+                    <button 
+                        class="btn btn-primary" 
+                        @click="generatePoem"
+                        :disabled="!poemData.style"
+                    >
+                        Generate Poem ✨
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generating State -->
+        <div v-if="currentView === 'generating'" class="generating">
+            <div class="heart-loading">
+                <i data-lucide="heart" style="width: 64px; height: 64px; color: var(--color-rose); fill: var(--color-rose);"></i>
+            </div>
+            <p class="generating-text">Crafting your poem with love...</p>
+        </div>
+
+        <!-- Poem Display -->
+        <div v-if="currentView === 'poem'" class="poem-display">
+            <div class="poem-card">
+                <div class="poem-header" v-if="poemData.name || poemData.photoPreview">
+                    <img v-if="poemData.photoPreview" :src="poemData.photoPreview" class="poem-photo" />
+                    <div v-if="poemData.name" class="poem-for">For {{ poemData.name }}</div>
+                </div>
+
+                <div class="poem-text">{{ generatedPoem }}</div>
+
+                <div class="poem-footer">
+                    <span class="watermark">LoveVerse</span>
+                    <span class="poem-style-badge">{{ selectedStyleName }}</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" @click="copyPoem">
+                    <i data-lucide="copy" class="lucide-icon"></i>
+                    Copy Text
+                </button>
+                <button class="action-btn" @click="showShareModal">
+                    <i data-lucide="share-2" class="lucide-icon"></i>
+                    Share
+                </button>
+                <button class="action-btn" @click="showSaveModal">
+                    <i data-lucide="save" class="lucide-icon"></i>
+                    Save Forever
+                </button>
+                <button class="action-btn" @click="createAnother">
+                    <i data-lucide="sparkles" class="lucide-icon"></i>
+                    Create Another
+                </button>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div v-if="showModal" class="modal-overlay" @click="closeModal">
+            <div class="modal" @click.stop>
+                <button class="modal-close" @click="closeModal">×</button>
+                
+                <!-- Premium Modal -->
+                <div v-if="modalType === 'premium'">
+                    <div class="modal-icon">
+                        <i data-lucide="crown" style="width: 48px; height: 48px; color: var(--color-gold);"></i>
+                    </div>
+                    <h3 class="modal-title">Unlock Premium Styles</h3>
+                    <p class="modal-text">
+                        Get access to Shakespearean sonnets, acrostic poems, and more with LoveVerse Premium.
+                    </p>
+                    <div class="modal-highlight">
+                        <strong>Premium Benefits:</strong><br>
+                        • All poem styles unlocked<br>
+                        • Unlimited generations<br>
+                        • No watermark<br>
+                        • Save & edit poems<br>
+                        • HD downloads
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" @click="upgradeToPremium">
+                            Upgrade Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Save Modal -->
+                <div v-if="modalType === 'save'">
+                    <div class="modal-icon">
+                        <i data-lucide="heart" style="width: 48px; height: 48px; color: var(--color-rose); fill: var(--color-rose-light);"></i>
+                    </div>
+                    <h3 class="modal-title">Save This Poem Forever</h3>
+                    <p class="modal-text">
+                        Create an account to save your poems, access them anytime, and never lose a precious memory.
+                    </p>
+                    <div class="button-group">
+                        <button class="btn btn-primary" @click="createAccount">
+                            Create Free Account
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Limit Reached Modal -->
+                <div v-if="modalType === 'limit'">
+                    <div class="modal-icon">
+                        <i data-lucide="clock" style="width: 48px; height: 48px; color: var(--color-rose);"></i>
+                    </div>
+                    <h3 class="modal-title">Daily Limit Reached</h3>
+                    <p class="modal-text">
+                        You've used your free poems for today. Upgrade to Premium for unlimited poem generation!
+                    </p>
+                    <div class="button-group">
+                        <button class="btn btn-primary" @click="upgradeToPremium">
+                            Go Premium
+                        </button>
+                        <button class="btn btn-secondary" @click="closeModal">
+                            Come Back Tomorrow
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Share Modal -->
+                <div v-if="modalType === 'share'">
+                    <div class="modal-icon">
+                        <i data-lucide="smartphone" style="width: 48px; height: 48px; color: var(--color-rose);"></i>
+                    </div>
+                    <h3 class="modal-title">Share Your Poem</h3>
+                    <p class="modal-text">
+                        Spread the love! Share your poem on social media or copy the link.
+                    </p>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" @click="shareTwitter">
+                            Twitter
+                        </button>
+                        <button class="btn btn-secondary" @click="shareWhatsApp">
+                            WhatsApp
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Copy Success -->
+                <div v-if="modalType === 'copied'">
+                    <div class="modal-icon">
+                        <i data-lucide="check-circle" style="width: 48px; height: 48px; color: var(--color-rose);"></i>
+                    </div>
+                    <h3 class="modal-title">Copied!</h3>
+                    <p class="modal-text">
+                        Your poem has been copied to clipboard. Paste it anywhere you'd like!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentView: 'landing',
+                    step: 1,
+                    anonymousUserId: null,
+                    generationCount: 0,
+                    maxFreeGenerations: 2,
+                    poemData: {
+                        name: '',
+                        description: '',
+                        photo: null,
+                        photoPreview: null,
+                        style: null
+                    },
+                    styles: [
+                        {
+                            id: 'classic',
+                            name: 'Classic Romance',
+                            description: 'Timeless and elegant, like a love letter from centuries past',
+                            premium: false
+                        },
+                        {
+                            id: 'playful',
+                            name: 'Playful & Light',
+                            description: 'Fun, whimsical verses that bring a smile',
+                            premium: false
+                        },
+                        {
+                            id: 'passionate',
+                            name: 'Passionate',
+                            description: 'Intense, heartfelt emotion that burns bright',
+                            premium: false
+                        },
+                        {
+                            id: 'haiku',
+                            name: 'Haiku',
+                            description: 'Simple, beautiful moments in three lines',
+                            premium: false
+                        },
+                        {
+                            id: 'sonnet',
+                            name: 'Shakespearean Sonnet',
+                            description: 'Classic 14-line structure with perfect rhythm',
+                            premium: true
+                        },
+                        {
+                            id: 'acrostic',
+                            name: 'Acrostic',
+                            description: 'Each line begins with a letter of their name',
+                            premium: true
+                        }
+                    ],
+                    generatedPoem: '',
+                    showModal: false,
+                    modalType: null
+                };
+            },
+            computed: {
+                selectedStyleName() {
+                    const style = this.styles.find(s => s.id === this.poemData.style);
+                    return style ? style.name : '';
+                }
+            },
+            mounted() {
+                this.initializeUser();
+            },
+            methods: {
+                initializeUser() {
+                    let userId = localStorage.getItem('loveverse_anonymous_id');
+                    if (!userId) {
+                        userId = this.generateUUID();
+                        localStorage.setItem('loveverse_anonymous_id', userId);
+                    }
+                    this.anonymousUserId = userId;
+
+                    const count = localStorage.getItem('loveverse_generation_count');
+                    this.generationCount = count ? parseInt(count) : 0;
+
+                    this.loadDraft();
+                },
+                generateUUID() {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0;
+                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                },
+                startCreating() {
+                    if (this.generationCount >= this.maxFreeGenerations) {
+                        this.showLimitModal();
+                        return;
+                    }
+                    this.currentView = 'create';
+                    this.step = 1;
+                },
+                nextStep() {
+                    if (this.step < 3) {
+                        this.step++;
+                        this.saveDraft();
+                    }
+                },
+                prevStep() {
+                    if (this.step > 1) {
+                        this.step--;
+                    }
+                },
+                goBack() {
+                    if (this.step === 1) {
+                        this.currentView = 'landing';
+                    } else {
+                        this.prevStep();
+                    }
+                },
+                selectStyle(style) {
+                    if (style.premium) {
+                        this.showPremiumModal();
+                        return;
+                    }
+                    this.poemData.style = style.id;
+                    this.saveDraft();
+                },
+                triggerPhotoUpload() {
+                    this.$refs.photoInput.click();
+                },
+                handlePhotoUpload(event) {
+                    const file = event.target.files[0];
+                    if (file && file.size <= 5 * 1024 * 1024) {
+                        this.poemData.photo = file;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.poemData.photoPreview = e.target.result;
+                            this.saveDraft();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+                removePhoto() {
+                    this.poemData.photo = null;
+                    this.poemData.photoPreview = null;
+                    this.saveDraft();
+                },
+                async generatePoem() {
+                    this.currentView = 'generating';
+
+                    // Simulate AI generation (in production, this calls Claude API)
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+
+                    // Generate poem based on style
+                    this.generatedPoem = this.createPoemText();
+
+                    this.generationCount++;
+                    localStorage.setItem('loveverse_generation_count', this.generationCount);
+
+                    this.currentView = 'poem';
+                },
+                createPoemText() {
+                    const name = this.poemData.name || 'you';
+                    const desc = this.poemData.description;
+                    const style = this.poemData.style;
+
+                    // Sample poem templates (in production, this is AI-generated)
+                    const poems = {
+                        classic: `In quiet moments when the world stands still,
+I think of ${name}, and my heart fills with grace.
+${desc.slice(0, 60)}...
+A love so pure, no words could ever replace.
+
+Your presence brings a warmth I've never known,
+Like morning sun that breaks through winter's night.
+In every smile, in every gentle tone,
+You paint my world in colors warm and bright.`,
+
+                        playful: `Oh ${name}, you wonderful surprise!
+With ${desc.slice(0, 40)}...
+You make me laugh until I cry,
+And turn my ordinary days to magic.
+
+When I'm with you, the world's a playground bright,
+Where every moment sparkles like champagne.
+You've turned my life from black and white,
+To rainbows dancing in the summer rain!`,
+
+                        passionate: `${name} – your name ignites my soul like fire,
+${desc.slice(0, 50)}...
+My heart burns with endless, fierce desire,
+A flame that time could never steal away.
+
+You are the thunder in my quiet storm,
+The lightning that illuminates my night.
+In your embrace, I find my truest form,
+And lose myself in overwhelming light.`,
+
+                        haiku: `${name}'s gentle smile
+${desc.slice(0, 30)}...
+Love blooms in my heart`
+                    };
+
+                    return poems[style] || poems.classic;
+                },
+                copyPoem() {
+                    navigator.clipboard.writeText(this.generatedPoem);
+                    this.modalType = 'copied';
+                    this.showModal = true;
+                    setTimeout(() => {
+                        this.closeModal();
+                    }, 2000);
+                },
+                showShareModal() {
+                    this.modalType = 'share';
+                    this.showModal = true;
+                },
+                showSaveModal() {
+                    this.modalType = 'save';
+                    this.showModal = true;
+                },
+                showPremiumModal() {
+                    this.modalType = 'premium';
+                    this.showModal = true;
+                },
+                showLimitModal() {
+                    this.modalType = 'limit';
+                    this.showModal = true;
+                },
+                closeModal() {
+                    this.showModal = false;
+                    this.modalType = null;
+                },
+                shareTwitter() {
+                    const text = `I just created a beautiful love poem with LoveVerse! ✨`;
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+                },
+                shareWhatsApp() {
+                    const text = `Check out this love poem I created:\n\n${this.generatedPoem}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                },
+                createAnother() {
+                    if (this.generationCount >= this.maxFreeGenerations) {
+                        this.showLimitModal();
+                        return;
+                    }
+                    this.poemData = {
+                        name: '',
+                        description: '',
+                        photo: null,
+                        photoPreview: null,
+                        style: null
+                    };
+                    this.generatedPoem = '';
+                    this.currentView = 'create';
+                    this.step = 1;
+                },
+                upgradeToPremium() {
+                    alert('Premium upgrade would redirect to payment flow. This is a demo.');
+                    this.closeModal();
+                },
+                createAccount() {
+                    alert('Account creation would show signup form. This is a demo.');
+                    this.closeModal();
+                },
+                saveDraft() {
+                    const draft = {
+                        name: this.poemData.name,
+                        description: this.poemData.description,
+                        photoPreview: this.poemData.photoPreview,
+                        style: this.poemData.style
+                    };
+                    localStorage.setItem('loveverse_draft', JSON.stringify(draft));
+                },
+                loadDraft() {
+                    const draft = localStorage.getItem('loveverse_draft');
+                    if (draft) {
+                        const data = JSON.parse(draft);
+                        this.poemData.name = data.name || '';
+                        this.poemData.description = data.description || '';
+                        this.poemData.photoPreview = data.photoPreview || null;
+                        this.poemData.style = data.style || null;
+                    }
+                }
+            }
+        }).mount('#app');
+
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+        // Re-initialize icons when Vue updates the DOM
+        const observer = new MutationObserver(() => {
+            lucide.createIcons();
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    </script>
+</body>
+</html>
