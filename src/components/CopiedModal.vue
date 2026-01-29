@@ -4,9 +4,9 @@
       <div class="modal-icon">
         <CheckCircle :size="48" :stroke-width="2" />
       </div>
-      <h3 class="modal-title">Copied!</h3>
-      <p class="modal-text">
-        Your poem has been copied to clipboard. Paste it anywhere you'd like!
+      <h3 class="modal-title">{{ message }}</h3>
+      <p class="modal-text" v-if="showSubtext">
+        Your content has been copied to clipboard!
       </p>
     </div>
   </BaseModal>
@@ -15,6 +15,16 @@
 <script setup>
 import BaseModal from './BaseModal.vue'
 import { CheckCircle } from 'lucide-vue-next'
+import { computed } from 'vue'
+
+const props = defineProps({
+  message: {
+    type: String,
+    default: 'Copied!'
+  }
+})
+
+const showSubtext = computed(() => props.message === 'Copied!')
 
 defineEmits(['close'])
 </script>

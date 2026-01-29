@@ -86,8 +86,8 @@ const shareNative = async () => {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
-        title: 'My LoveVerse Poem',
-        text: 'I created this beautiful poem with LoveVerse ❤️'
+        title: 'My dear.luv Poem',
+        text: 'I created this beautiful poem with dear.luv ❤️'
       })
     }
   } catch (error) {
@@ -96,13 +96,13 @@ const shareNative = async () => {
 }
 
 const shareTwitter = () => {
-  const text = 'I just created a beautiful love poem with LoveVerse! ❤️✨'
+  const text = 'I just created a beautiful love poem with dear.luv! ❤️✨'
   const url = 'https://loveverse.app'
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
 }
 
 const shareWhatsApp = () => {
-  const text = 'I just created a beautiful love poem with LoveVerse! ❤️ Check it out!'
+  const text = 'I just created a beautiful love poem with dear.luv! ❤️ Check it out!'
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
 }
 
