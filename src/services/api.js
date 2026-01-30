@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8001/api/v1'
+const API_BASE_URL = 'https://dearluv.iquest.com.ng/api/v1'; // || 'http://127.0.0.1:8001/api/v1'
 
 // Create axios instance
 const apiClient = axios.create({
