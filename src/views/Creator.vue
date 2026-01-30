@@ -22,6 +22,11 @@
       v-if="showLimitModal"
       @close="showLimitModal = false"
     />
+    
+    <PremiumModal 
+      v-if="showPremiumModal"
+      @close="showPremiumModal = false"
+    />
   </div>
 </template>
 
@@ -34,13 +39,23 @@ import StepDetails from '@/components/StepDetails.vue'
 import StepPhoto from '@/components/StepPhoto.vue'
 import StepStyle from '@/components/StepStyle.vue'
 import LimitModal from '@/components/LimitModal.vue'
+import PremiumModal from '@/components/PremiumModal.vue'
 
 const router = useRouter()
-const { canGenerate, poemDraft, incrementGeneration, currentPoem } = useUser()
+const { 
+  canGenerate, 
+  poemDraft, 
+  currentPoem, 
+  currentPoemId, 
+  anonymousUserId,
+  remainingGenerations,
+  checkLimits 
+} = useUser()
 const { generatePoem } = usePoemGenerator()
 
 const currentStep = ref(1)
 const showLimitModal = ref(false)
+const showPremiumModal = ref(false)
 
 onMounted(() => {
   if (!canGenerate.value) {
@@ -77,15 +92,48 @@ const handleGenerate = async () => {
     return
   }
 
+  // Navigate to generating state
   router.push('/poem/generating')
   
   try {
-    const poem = await generatePoem(poemDraft.value)
-    currentPoem.value = poem
-    incrementGeneration()
-    router.push('/poem')
+    // Prepare poem data
+    const poemData = {
+      anonymousId: anonymousUserId.value,
+      name: poemDraft.value.name,
+      description: poemDraft.value.description,
+      style: poemDraft.value.style,
+      photo: poemDraft.value.photo
+    }
+
+    // Generate poem via API
+    const result = await generatePoem(poemData, false)
+
+    if (result.success) {
+      // Store the generated poem
+      currentPoem.value = result.poem.content
+      currentPoemId.value = result.poem.id
+      
+      // Update remaining generations
+      if (result.remaining !== undefined) {
+        remainingGenerations.value = result.remaining
+      }
+      
+      // Navigate to poem display
+      router.push('/poem')
+    } else if (result.limitReached) {
+      showLimitModal.value = true
+      router.push('/create')
+    } else if (result.requiresPremium) {
+      showPremiumModal.value = true
+      router.push('/create')
+    } else {
+      // Generic error
+      alert(result.error || 'Failed to generate poem. Please try again.')
+      router.push('/create')
+    }
   } catch (error) {
     console.error('Failed to generate poem:', error)
+    alert('An unexpected error occurred. Please try again.')
     router.push('/create')
   }
 }

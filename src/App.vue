@@ -9,10 +9,37 @@
     </div>
 
     <header>
-      <router-link to="/" class="logo-link">
-        <div class="logo">dear.luv</div>
-      </router-link>
-      <div class="tagline">Say what you feel. Finally.</div>
+      <div class="header-content">
+        <router-link to="/" class="logo-link">
+          <div class="logo">dear.luv</div>
+        </router-link>
+        <div class="tagline">Craft love into words, instantly</div>
+      </div>
+
+      <div class="header-actions">
+        <template v-if="isAuthenticated">
+          <div class="user-info">
+            <User :size="20" />
+            <span>{{ currentUser?.name }}</span>
+            <span v-if="isPremium" class="premium-badge">
+              <Crown :size="14" />
+              Premium
+            </span>
+          </div>
+          <button @click="handleLogout" class="btn-secondary">
+            <LogOut :size="18" />
+            Logout
+          </button>
+        </template>
+        <template v-else>
+          <button @click="showLoginModal = true" class="btn-text">
+            Sign In
+          </button>
+          <button @click="showRegisterModal = true" class="btn-primary-small">
+            Get Started
+          </button>
+        </template>
+      </div>
     </header>
 
     <main>
@@ -22,11 +49,48 @@
         </transition>
       </router-view>
     </main>
+
+    <!-- Auth Modals -->
+    <LoginModal 
+      v-if="showLoginModal" 
+      @close="showLoginModal = false"
+      @switchToRegister="switchToRegister"
+    />
+    
+    <RegisterModal 
+      v-if="showRegisterModal" 
+      @close="showRegisterModal = false"
+      @switchToLogin="switchToLogin"
+    />
   </div>
 </template>
 
 <script setup>
-// App component handles layout and routing
+import { ref, onMounted } from 'vue'
+import { useUser } from '@/composables/useUser'
+import { User, Crown, LogOut } from 'lucide-vue-next'
+import LoginModal from '@/components/LoginModal.vue'
+import RegisterModal from '@/components/RegisterModal.vue'
+
+const { isAuthenticated, isPremium, currentUser, logout } = useUser()
+
+const showLoginModal = ref(false)
+const showRegisterModal = ref(false)
+
+const switchToRegister = () => {
+  showLoginModal.value = false
+  showRegisterModal.value = true
+}
+
+const switchToLogin = () => {
+  showRegisterModal.value = false
+  showLoginModal.value = true
+}
+
+const handleLogout = async () => {
+  await logout()
+  window.location.href = '/'
+}
 </script>
 
 <style scoped>
@@ -54,10 +118,102 @@
 
 header {
   padding: 2rem;
-  text-align: center;
   animation: fadeInDown 0.8s ease-out;
   position: relative;
   z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-content {
+  text-align: center;
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: var(--color-rose-dark);
+}
+
+.premium-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--color-gold);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--color-rose);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-text:hover {
+  color: var(--color-rose-dark);
+}
+
+.btn-primary-small {
+  background: var(--color-rose);
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.btn-primary-small:hover {
+  background: var(--color-rose-dark);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--color-rose-light);
+  color: var(--color-rose-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background: var(--color-rose);
+  color: white;
+  border-color: var(--color-rose);
 }
 
 .logo-link {
@@ -97,8 +253,26 @@ main {
 }
 
 @media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header-content {
+    margin-bottom: 1rem;
+  }
+
   .logo {
     font-size: 2rem;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .user-info {
+    font-size: 0.75rem;
   }
 }
 </style>

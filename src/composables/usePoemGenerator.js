@@ -1,107 +1,220 @@
 import { ref } from 'vue'
+import { api } from '@/services/api'
 
 export const poemStyles = [
   {
     id: 'classic',
     name: 'Classic Romance',
     description: 'Timeless and elegant, like a love letter from centuries past',
+    icon: '📜',
     premium: false
   },
   {
     id: 'playful',
     name: 'Playful & Light',
     description: 'Fun, whimsical verses that bring a smile',
+    icon: '😊',
     premium: false
   },
   {
     id: 'passionate',
     name: 'Passionate',
     description: 'Intense, heartfelt emotion that burns bright',
+    icon: '🔥',
     premium: false
   },
   {
     id: 'haiku',
     name: 'Haiku',
     description: 'Simple, beautiful moments in three lines',
+    icon: '🌸',
     premium: false
   },
   {
     id: 'sonnet',
     name: 'Shakespearean Sonnet',
     description: 'Classic 14-line structure with perfect rhythm',
+    icon: '👑',
     premium: true
   },
   {
     id: 'acrostic',
     name: 'Acrostic',
     description: 'Each line begins with a letter of their name',
+    icon: '✍️',
     premium: true
   }
 ]
 
+const isGenerating = ref(false)
+const generationError = ref(null)
+
 export function usePoemGenerator() {
-  const isGenerating = ref(false)
-
-  const generatePoem = async (poemData) => {
+  /**
+   * Generate a poem using the API
+   */
+  const generatePoem = async (poemData, usePhotoBackground = false) => {
     isGenerating.value = true
+    generationError.value = null
 
-    // Simulate AI generation (in production, this calls Claude API)
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    try {
+      // Create FormData for multipart upload
+      const formData = new FormData()
+      formData.append('anonymous_id', poemData.anonymousId)
+      formData.append('description', poemData.description)
+      formData.append('style', poemData.style)
+      formData.append('uses_photo_background', usePhotoBackground ? '1' : '0')
+      
+      if (poemData.name) {
+        formData.append('recipient_name', poemData.name)
+      }
+      
+      if (poemData.photo) {
+        formData.append('image', poemData.photo)
+      }
 
-    const poem = createPoemText(poemData)
-    
-    isGenerating.value = false
-    return poem
+      const response = await api.poems.generate(formData)
+
+      if (response.data.success) {
+        return {
+          success: true,
+          poem: response.data.poem,
+          remaining: response.data.remaining_generations
+        }
+      }
+    } catch (error) {
+      console.error('Poem generation error:', error)
+      
+      const errorData = error.response?.data
+      
+      // Handle specific error types
+      if (errorData?.limit_reached) {
+        return {
+          success: false,
+          limitReached: true,
+          error: 'Daily generation limit reached'
+        }
+      }
+      
+      if (errorData?.requires_premium) {
+        return {
+          success: false,
+          requiresPremium: true,
+          error: errorData.error || 'Premium feature required'
+        }
+      }
+      
+      generationError.value = errorData?.error || 'Failed to generate poem'
+      
+      return {
+        success: false,
+        error: generationError.value
+      }
+    } finally {
+      isGenerating.value = false
+    }
   }
 
-  const createPoemText = (poemData) => {
-    const name = poemData.name || 'you'
-    const desc = poemData.description
-    const style = poemData.style
-
-    // Sample poem templates (in production, this is AI-generated)
-    const poems = {
-      classic: `In quiet moments when the world stands still,
-I think of ${name}, and my heart fills with grace.
-${desc.slice(0, 60)}...
-A love so pure, no words could ever replace.
-
-Your presence brings a warmth I've never known,
-Like morning sun that breaks through winter's night.
-In every smile, in every gentle tone,
-You paint my world in colors warm and bright.`,
-
-      playful: `Oh ${name}, you wonderful surprise!
-With ${desc.slice(0, 40)}...
-You make me laugh until I cry,
-And turn my ordinary days to magic.
-
-When I'm with you, the world's a playground bright,
-Where every moment sparkles like champagne.
-You've turned my life from black and white,
-To rainbows dancing in the summer rain!`,
-
-      passionate: `${name} – your name ignites my soul like fire,
-${desc.slice(0, 50)}...
-My heart burns with endless, fierce desire,
-A flame that time could never steal away.
-
-You are the thunder in my quiet storm,
-The lightning that illuminates my night.
-In your embrace, I find my truest form,
-And lose myself in overwhelming light.`,
-
-      haiku: `${name}'s gentle smile
-${desc.slice(0, 30)}...
-Love blooms in my heart`
+  /**
+   * Get available poem styles from API
+   */
+  const getAvailableStyles = async () => {
+    try {
+      const response = await api.poems.getStyles()
+      if (response.data.success) {
+        return response.data.styles
+      }
+      return poemStyles // Fallback to local
+    } catch (error) {
+      console.error('Failed to load styles:', error)
+      return poemStyles // Fallback to local
     }
+  }
 
-    return poems[style] || poems.classic
+  /**
+   * Get a specific poem by UUID
+   */
+  const getPoem = async (uuid) => {
+    try {
+      const response = await api.poems.get(uuid)
+      if (response.data.success) {
+        return {
+          success: true,
+          poem: response.data.poem
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load poem:', error)
+      return {
+        success: false,
+        error: 'Poem not found'
+      }
+    }
+  }
+
+  /**
+   * Get user's poem list
+   */
+  const getUserPoems = async (page = 1) => {
+    try {
+      const response = await api.poems.list(page)
+      if (response.data.success) {
+        return {
+          success: true,
+          poems: response.data.poems,
+          pagination: response.data.pagination
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load poems:', error)
+      return {
+        success: false,
+        error: 'Failed to load poems',
+        poems: [],
+        pagination: null
+      }
+    }
+  }
+
+  /**
+   * Delete a poem
+   */
+  const deletePoem = async (uuid) => {
+    try {
+      const response = await api.poems.delete(uuid)
+      return {
+        success: response.data.success,
+        message: response.data.message
+      }
+    } catch (error) {
+      console.error('Failed to delete poem:', error)
+      return {
+        success: false,
+        error: 'Failed to delete poem'
+      }
+    }
+  }
+
+  /**
+   * Track poem share
+   */
+  const trackShare = async (uuid) => {
+    try {
+      await api.poems.trackShare(uuid)
+    } catch (error) {
+      console.error('Failed to track share:', error)
+    }
   }
 
   return {
+    poemStyles,
     isGenerating,
+    generationError,
     generatePoem,
-    poemStyles
+    getAvailableStyles,
+    getPoem,
+    getUserPoems,
+    deletePoem,
+    trackShare,
   }
 }

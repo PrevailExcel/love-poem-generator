@@ -12,7 +12,8 @@
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
     "lucide-vue-next": "^0.344.0",
-    "html2canvas": "^1.4.1"
+    "html2canvas": "^1.4.1",
+    "axios": "^1.6.7"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
