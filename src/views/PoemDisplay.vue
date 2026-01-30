@@ -55,7 +55,7 @@
             <div class="poem-footer">
               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
               <div class="footer-right">
-               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
+               <!-- <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span> -->
               </div>
             </div>
           </div>
