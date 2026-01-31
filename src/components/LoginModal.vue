@@ -1,9 +1,9 @@
 <template>
   <BaseModal @close="$emit('close')">
     <div class="modal-content">
-      <div class="modal-icon">
+      <!-- <div class="modal-icon">
         <LogIn :size="48" :stroke-width="2" />
-      </div>
+      </div> -->
       
       <h3 class="modal-title">Welcome Back</h3>
       <p class="modal-text">Sign in to save your poems and unlock premium features</p>
@@ -104,25 +104,25 @@ const switchToRegister = () => {
 
 .modal-title {
   font-family: var(--font-serif);
-  font-size: 2rem;
+  font-size: 1.5rem;
   color: var(--color-rose-dark);
-  margin-bottom: 0.5rem;
+  margin-bottom: 6px;
 }
 
 .modal-text {
   color: var(--color-ink);
   opacity: 0.8;
   line-height: 1.6;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .auth-form {
   text-align: left;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
@@ -137,7 +137,7 @@ const switchToRegister = () => {
 
 .form-group input {
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.475rem 0.7rem;
   border: 2px solid rgba(139, 71, 93, 0.15);
   border-radius: 12px;
   font-family: var(--font-body);

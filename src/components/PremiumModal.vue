@@ -7,7 +7,7 @@
       </div>
       <h3 class="modal-title">Unlock Premium Styles</h3>
       <p class="modal-text">
-        Get access to Shakespearean sonnets, acrostic poems, and more with LoveVerse Premium.
+        Get access to Shakespearean sonnets, acrostic poems, and more with dear.luv Premium.
       </p>
       <div class="modal-highlight">
         <strong>Premium Benefits:</strong><br>

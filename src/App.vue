@@ -16,30 +16,32 @@
         <div class="tagline">Craft love into words, instantly</div>
       </div>
 
-      <div class="header-actions">
-        <template v-if="isAuthenticated">
-          <div class="user-info">
-            <User :size="20" />
-            <span>{{ currentUser?.name }}</span>
-            <span v-if="isPremium" class="premium-badge">
-              <Crown :size="14" />
-              Premium
-            </span>
-          </div>
-          <button @click="handleLogout" class="btn-secondary">
-            <LogOut :size="18" />
-            Logout
-          </button>
-        </template>
-        <template v-else>
-          <button @click="showLoginModal = true" class="btn-text">
-            Sign In
-          </button>
-          <button @click="showRegisterModal = true" class="btn-primary-small">
-            Get Started
-          </button>
-        </template>
-      </div>
+      <transition name="fade">
+        <div class="header-actions" v-if="!isLandingPage">
+          <template v-if="isAuthenticated">
+            <div class="user-info">
+              <User :size="20" />
+              <span>{{ currentUser?.name }}</span>
+              <span v-if="isPremium" class="premium-badge">
+                <Crown :size="14" />
+                Premium
+              </span>
+            </div>
+            <button @click="handleLogout" class="btn-secondary">
+              <LogOut :size="18" />
+              Logout
+            </button>
+          </template>
+          <template v-else>
+            <button @click="showLoginModal = true" class="btn-text">
+              Sign In
+            </button>
+            <button @click="showRegisterModal = true" class="btn-primary-small">
+              Get Started
+            </button>
+          </template>
+        </div>
+      </transition>
     </header>
 
     <main>
@@ -66,7 +68,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUser } from '@/composables/useUser'
 import { User, Crown, LogOut } from 'lucide-vue-next'
 import LoginModal from '@/components/LoginModal.vue'
@@ -76,6 +79,9 @@ const { isAuthenticated, isPremium, currentUser, logout } = useUser()
 
 const showLoginModal = ref(false)
 const showRegisterModal = ref(false)
+
+const route = useRoute()
+const isLandingPage = computed(() => route.name === 'landing')
 
 const switchToRegister = () => {
   showLoginModal.value = false

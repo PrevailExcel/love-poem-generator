@@ -1,4 +1,4 @@
-# LoveVerse – AI Love Poem Builder
+# dear.luv – AI Love Poem Builder
 
 > Craft love into words, instantly.
 
@@ -70,7 +70,7 @@ loveverse/
 
 ## 🎨 Design Philosophy
 
-LoveVerse follows an **emotion-first** design approach:
+dear.luv follows an **emotion-first** design approach:
 
 - **Typography**: Cormorant Garamond (serif), Crimson Pro (body), Homemade Apple (script)
 - **Color Palette**: Rose (#8B475D), Cream (#FFF8F3), Gold (#C9A572)
