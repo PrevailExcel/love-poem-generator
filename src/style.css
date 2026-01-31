@@ -137,7 +137,15 @@ body {
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
+    animation: breathe 4s ease-in-out infinite;
+
 }
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
 
 .cta-button:before {
   content: '';

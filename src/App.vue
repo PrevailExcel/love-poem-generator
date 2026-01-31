@@ -13,7 +13,7 @@
         <router-link to="/" class="logo-link">
           <div class="logo">dear.luv</div>
         </router-link>
-        <div class="tagline">Craft love into words, instantly</div>
+        <div class="tagline">Say what you feel. Finally.</div>
       </div>
 
       <transition name="fade">

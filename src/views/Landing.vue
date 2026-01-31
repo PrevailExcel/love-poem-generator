@@ -1,15 +1,22 @@
 <template>
   <div class="landing">
     <div class="hero">
+        <div class="romance-particles" aria-hidden="true">
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+  </div>
       <h1 class="hero-title">For the words you can’t find</h1>
       <p class="hero-subtitle">
-Dear.luv helps you turn feelings into words that come straight from your heart.
+        Dear.luv helps you turn feelings into words that come straight from your heart.
       </p>
       <p class="hero-description">
-So every word feels warm, real, and unmistakably yours.
+        Because the right words change everything.
       </p>
       <button class="cta-button" @click="startCreating">Create Your Poem</button>
       <p class="no-account">No account required • Free to start</p>
+
     </div>
 
     <div class="features">
@@ -181,6 +188,8 @@ const startCreating = () => {
 .hero {
   text-align: center;
   margin-bottom: 4rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-title {
@@ -270,6 +279,55 @@ const startCreating = () => {
   margin-bottom: 1rem;
   font-weight: 400;
 }
+
+.romance-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.romance-particles span {
+  position: absolute;
+  bottom: -20px;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 180, 200, 0.85);
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: floatUp 14s linear infinite;
+  opacity: 0;
+}
+
+/* Stagger everything so it feels organic */
+.romance-particles span:nth-child(1) { left: 10%; animation-delay: 0s; }
+.romance-particles span:nth-child(2) { left: 20%; animation-delay: 4s; }
+.romance-particles span:nth-child(3) { left: 30%; animation-delay: 8s; }
+.romance-particles span:nth-child(4) { left: 40%; animation-delay: 2s; }
+.romance-particles span:nth-child(5) { left: 50%; animation-delay: 6s; }
+.romance-particles span:nth-child(6) { left: 60%; animation-delay: 10s; }
+.romance-particles span:nth-child(7) { left: 70%; animation-delay: 1s; }
+.romance-particles span:nth-child(8) { left: 80%; animation-delay: 5s; }
+.romance-particles span:nth-child(9) { left: 90%; animation-delay: 9s; }
+.romance-particles span:nth-child(10){ left: 15%; animation-delay: 7s; }
+.romance-particles span:nth-child(11){ left: 55%; animation-delay: 3s; }
+.romance-particles span:nth-child(12){ left: 75%; animation-delay: 11s; }
+
+@keyframes floatUp {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(12px, -120vh);
+    opacity: 0;
+  }
+}
+
+
 
 .section-subtitle {
   text-align: center;
