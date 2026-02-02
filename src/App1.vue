@@ -13,19 +13,15 @@
         <router-link to="/" class="logo-link">
           <div class="logo">dear.luv</div>
         </router-link>
-        <div class="tagline">Craft love into words, instantly</div>
+        <div class="tagline">Say what you feel. Finally.</div>
       </div>
 
       <div class="header-actions">
         <template v-if="isAuthenticated">
-
-          <div class="user-info">
-          <router-link to="/dashboard" class="dashboard-link user-link">
-            <Heart :size="18" />
-            <span>My Poems</span>
-          </router-link>
+          <div class="credits-display" v-if="credits !== null">
+            <Sparkles :size="16" />
+            <span>Poems left: {{ credits }}</span>
           </div>
-          
           <div class="user-info">
             <User :size="20" />
             <span>{{ currentUser?.name }}</span>
@@ -76,7 +72,7 @@
 <script setup>
 import { ref, onMounted, provide } from 'vue'
 import { useUser } from '@/composables/useUser'
-import { User, Crown, LogOut, Sparkles, Heart } from 'lucide-vue-next'
+import { User, Crown, LogOut, Sparkles } from 'lucide-vue-next'
 import LoginModal from '@/components/LoginModal.vue'
 import RegisterModal from '@/components/RegisterModal.vue'
 
@@ -291,17 +287,6 @@ main {
   opacity: 0;
 }
 
-
-.user-link {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  text-decoration: none;
-  color: inherit;
-}
-
-
 @media (max-width: 768px) {
   header {
     flex-direction: column;
@@ -325,5 +310,4 @@ main {
     font-size: 0.75rem;
   }
 }
-
 </style>

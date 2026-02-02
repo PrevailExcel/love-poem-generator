@@ -9,20 +9,17 @@
         type="text" 
         v-model="poemDraft.name" 
         @input="saveDraft"
-        placeholder="Sola, Chinedu, or just ‘my love’" 
+        placeholder="Sarah" 
       />
     </div>
 
     <div class="form-group">
-      <label>What makes them special to you?</label>
+      <label>What makes them special?</label>
       <textarea 
         v-model="poemDraft.description" 
         @input="saveDraft"
-        placeholder="Their smile… the way they laugh… how they make ordinary moments feel special… the little things only you notice."
+        placeholder="Her laugh lights up every room. The way she sees beauty in small things. How she makes me want to be better..."
       ></textarea>
-        <small class="helper-text">
-    Just write from the heart. It doesn’t have to be perfect.
-        </small>
       <div class="char-counter">{{ poemDraft.description.length }} characters</div>
     </div>
 
@@ -117,12 +114,6 @@ textarea {
   font-size: 0.875rem;
   color: var(--color-rose-light);
   margin-top: 0.5rem;
-}
-.helper-text {
-  font-size: 0.875rem;
-  color: var(--color-rose);
-  margin-top: 0.5rem;
-  display: block;
 }
 
 .button-group {

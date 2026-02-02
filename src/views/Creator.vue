@@ -18,11 +18,6 @@
       </transition>
     </div>
 
-    <LimitModal 
-      v-if="showLimitModal"
-      @close="showLimitModal = false"
-    />
-    
     <PremiumModal 
       v-if="showPremiumModal"
       @close="showPremiumModal = false"
@@ -38,7 +33,6 @@ import { usePoemGenerator } from '@/composables/usePoemGenerator'
 import StepDetails from '@/components/StepDetails.vue'
 import StepPhoto from '@/components/StepPhoto.vue'
 import StepStyle from '@/components/StepStyle.vue'
-import LimitModal from '@/components/LimitModal.vue'
 import PremiumModal from '@/components/PremiumModal.vue'
 
 const router = useRouter()
@@ -54,14 +48,14 @@ const {
 const { generatePoem } = usePoemGenerator()
 
 const currentStep = ref(1)
-const showLimitModal = ref(false)
 const showPremiumModal = ref(false)
 
-onMounted(() => {
-  if (!canGenerate.value) {
-    showLimitModal.value = true
-  }
-})
+// Remove upfront limit check - let users generate first (emotion-first)
+// onMounted(() => {
+//   if (!canGenerate.value) {
+//     showLimitModal.value = true
+//   }
+// })
 
 const currentStepComponent = computed(() => {
   const components = {
@@ -87,11 +81,9 @@ const handlePrev = () => {
 }
 
 const handleGenerate = async () => {
-  if (!canGenerate.value) {
-    showLimitModal.value = true
-    return
-  }
-
+  // Per spec: Never block the user before they see value
+  // Remove upfront limit check - let poem generate first
+  
   // Navigate to generating state
   router.push('/poem/generating')
   
@@ -105,7 +97,7 @@ const handleGenerate = async () => {
       photo: poemDraft.value.photo
     }
 
-    // Generate poem via API
+    // Generate poem via API (always allow generation)
     const result = await generatePoem(poemData, false)
 
     if (result.success) {
@@ -118,14 +110,8 @@ const handleGenerate = async () => {
         remainingGenerations.value = result.remaining
       }
       
-      // Navigate to poem display
+      // Navigate to poem display (will show locked/unlocked state there)
       router.push('/poem')
-    } else if (result.limitReached) {
-      showLimitModal.value = true
-      router.push('/create')
-    } else if (result.requiresPremium) {
-      showPremiumModal.value = true
-      router.push('/create')
     } else {
       // Generic error
       alert(result.error || 'Failed to generate poem. Please try again.')

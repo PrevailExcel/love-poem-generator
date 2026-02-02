@@ -31,7 +31,7 @@ const props = defineProps({
 defineEmits(['close'])
 
 const shareTwitter = () => {
-  const text = `I just created a beautiful love poem with dear.luv! ✨`
+  const text = `I just created a beautiful love poem with LoveVerse! ✨`
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
 }
 

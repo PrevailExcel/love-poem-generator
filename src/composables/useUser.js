@@ -6,6 +6,7 @@ const authToken = ref(null)
 const currentUser = ref(null)
 const generationCount = ref(0)
 const remainingGenerations = ref(2)
+const credits = ref(0) // Pay-per-poem credits
 const poemDraft = ref({
   name: '',
   description: '',
@@ -15,6 +16,7 @@ const poemDraft = ref({
 })
 const currentPoem = ref(null)
 const currentPoemId = ref(null)
+const isCurrentPoemUnlocked = ref(false)
 
 export function useUser() {
   // Initialize user
@@ -71,12 +73,25 @@ export function useUser() {
       if (response.data.success) {
         currentUser.value = response.data.user
         remainingGenerations.value = response.data.user.remaining_generations
+        credits.value = response.data.user.credits || 0
       }
     } catch (error) {
       console.error('Failed to load user:', error)
       // Clear invalid token
       localStorage.removeItem('loveverse_auth_token')
       authToken.value = null
+    }
+  }
+
+  // Load credits
+  const loadCredits = async () => {
+    try {
+      const response = await api.payments.getCredits()
+      if (response.data.success) {
+        credits.value = response.data.credits
+      }
+    } catch (error) {
+      console.error('Failed to load credits:', error)
     }
   }
 
@@ -187,15 +202,34 @@ export function useUser() {
     return remainingGenerations.value > 0
   })
 
+  // Unlock current poem
+  const unlockPoem = async (poemId) => {
+    try {
+      const response = await api.poems.unlock(poemId)
+      if (response.data.success) {
+        credits.value = response.data.credits_remaining
+        isCurrentPoemUnlocked.value = true
+        return { success: true }
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Failed to unlock poem'
+      }
+    }
+  }
+
   return {
     anonymousUserId,
     authToken,
     currentUser,
     generationCount,
     remainingGenerations,
+    credits,
     poemDraft,
     currentPoem,
     currentPoemId,
+    isCurrentPoemUnlocked,
     isAuthenticated,
     isPremium,
     canGenerate,
@@ -207,5 +241,7 @@ export function useUser() {
     logout,
     checkLimits,
     loadCurrentUser,
+    loadCredits,
+    unlockPoem,
   }
 }

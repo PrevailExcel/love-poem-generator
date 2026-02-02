@@ -55,7 +55,7 @@
             <div class="poem-footer">
               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
               <div class="footer-right">
-               <!-- <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span> -->
+               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
               </div>
             </div>
           </div>
@@ -212,6 +212,7 @@ import ShareImageModal from '@/components/ShareImageModal.vue'
 import CopiedModal from '@/components/CopiedModal.vue'
 import LimitModal from '@/components/LimitModal.vue'
 import html2canvas from 'html2canvas'
+import * as htmlToImage from 'html-to-image';
 
 const route = useRoute()
 const router = useRouter()
@@ -360,18 +361,55 @@ const copyLink = async () => {
     console.error('Failed to copy link:', error)
   }
 }
-
 const generateImage = async () => {
-  const canvas = await html2canvas(poemCard.value, {
-    backgroundColor: null,
-    scale: 2,
-    logging: false,
-    width: 600,
-    height: poemCard.value.scrollHeight,
-    windowWidth: 600
-  })
-  return canvas
-}
+  try {
+    const node = poemCard.value;
+
+    // Wait for fonts to be 100% ready
+    await document.fonts.ready;
+
+    // Generate PNG directly (skipping the manual canvas redraw to avoid quality loss)
+    const dataUrl = await htmlToImage.toPng(node, {
+      quality: 1,
+      pixelRatio: 4, // Increased to 4 for extreme crispness
+      cacheBust: true,
+      style: {
+        // FORCE the text to be thick and pure white during capture
+        // This overrides any CSS variables that might be failing
+        color: usePhotoBackground.value ? '#ffffff' : '#1a1a1a', 
+        fontWeight: 'bold', // Give the font more "meat"
+        textShadow: usePhotoBackground.value 
+          ? '0 0 1px #000, 0 0 1px #000' // Tiny dark outline to make white pop
+          : 'none',
+      },
+      // Ensure specific classes get a boost
+      filter: (domNode) => {
+        if (domNode.classList?.contains('photo-bg-text')) {
+           domNode.style.webkitTextStroke = "0.5px white"; // The secret weapon
+           domNode.style.opacity = "1";
+        }
+        return true;
+      }
+    });
+
+    // Convert to Image object for the return
+    const img = new Image();
+    img.src = dataUrl;
+    
+    return new Promise((resolve) => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas);
+      };
+    });
+  } catch (error) {
+    console.error('Export failed:', error);
+  }
+};
 
 const shareAsImage = async () => {
   // Check if using photo background without premium
@@ -903,6 +941,15 @@ onMounted(() => {
 .photo-bg-text {
   color: white !important;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  /* This creates a tiny 'halo' that prevents the library from 
+     anti-aliasing the edges into transparency */
+  text-shadow: 0px 0px 0.5px rgba(255, 255, 255, 0.8), 
+               0px 0px 0.5px rgba(255, 255, 255, 0.8);
+               
+  /* Force the renderer to be aggressive */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
 }
 
 .poem-card.has-photo-bg .poem-for {
@@ -926,7 +973,7 @@ onMounted(() => {
 
 .poem-content {
   position: relative;
-  z-index: 2;
+  z-index: 99;
   width: 100%;
 }
 

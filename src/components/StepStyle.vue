@@ -8,13 +8,9 @@
         v-for="style in poemStyles" 
         :key="style.id"
         class="style-card"
-        :class="{ selected: poemDraft.style === style.id, premium: style.premium }"
+        :class="{ selected: poemDraft.style === style.id }"
         @click="selectStyle(style)"
       >
-        <span v-if="style.premium" class="premium-badge">
-          <Crown :size="12" />
-          PREMIUM
-        </span>
         <div class="style-name">{{ style.name }}</div>
         <div class="style-description">{{ style.description }}</div>
       </div>
@@ -31,28 +27,20 @@
         Generate Poem
       </button>
     </div>
-
-    <PremiumModal v-if="showPremiumModal" @close="showPremiumModal = false" />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { useUser } from '@/composables/useUser'
 import { poemStyles } from '@/composables/usePoemGenerator'
-import { Crown, Sparkles } from 'lucide-vue-next'
-import PremiumModal from './PremiumModal.vue'
+import { Sparkles } from 'lucide-vue-next'
 
 const { poemDraft, saveDraft } = useUser()
-const showPremiumModal = ref(false)
 
 defineEmits(['prev', 'generate'])
 
 const selectStyle = (style) => {
-  if (style.premium) {
-    showPremiumModal.value = true
-    return
-  }
+  // MVP: All styles are equal, no premium gating
   poemDraft.value.style = style.id
   saveDraft()
 }

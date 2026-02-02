@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'https://dearluv.iquest.com.ng/api/v1'; // || 'http://127.0.0.1:8001/api/v1'
+const API_BASE_URL = 'http://localhost:8001/api/v1';// 'https://dearluv.iquest.com.ng/api/v1'; 
+// import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 
 // Create axios instance
 const apiClient = axios.create({
@@ -70,6 +71,7 @@ export const api = {
     list: (page = 1) => apiClient.get(`/poems?page=${page}`),
     delete: (uuid) => apiClient.delete(`/poems/${uuid}`),
     trackShare: (uuid) => apiClient.post(`/poems/${uuid}/share`),
+    unlock: (uuid) => apiClient.post(`/poems/${uuid}/unlock`),
   },
 
   // Subscriptions
@@ -77,6 +79,14 @@ export const api = {
     status: () => apiClient.get('/subscription/status'),
     createCheckout: () => apiClient.post('/subscription/checkout'),
     createPortal: () => apiClient.post('/subscription/portal'),
+  },
+
+  // Payments (Pay-per-poem)
+  payments: {
+    createCheckout: (data) => apiClient.post('/payments/checkout', data),
+    verifyPayment: (reference) => apiClient.get(`/payments/verify/${reference}`),
+    getCredits: () => apiClient.get('/payments/credits'),
+    history: () => apiClient.get('/payments/history'),
   },
 }
 
