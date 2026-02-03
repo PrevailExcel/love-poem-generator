@@ -50,7 +50,7 @@
 
 <template v-if="!isAuthenticated">
               <div class="visible-lines">
-                <p v-for="(line, index) in visibleLines" :key="index" class="poem-line">
+                <p v-for="(line, index) in visibleLines" :key="index" class="poem-text poem-line">
                   {{ line }}
                 </p>
               </div>
@@ -1193,7 +1193,7 @@ const autoUnlock = async () => {
 .poem-line {
   font-size: 1.375rem;
   line-height:1.3;
-  margin: 1rem;
+  margin: 1rem !important;
   text-align: center;
 }
 
