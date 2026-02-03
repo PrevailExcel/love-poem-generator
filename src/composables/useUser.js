@@ -59,7 +59,7 @@ export function useUser() {
 
   // Generate UUID v4
   const generateUUID = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       const r = Math.random() * 16 | 0
       const v = c === 'x' ? r : (r & 0x3 | 0x8)
       return v.toString(16)
@@ -139,7 +139,7 @@ export function useUser() {
         password,
         anonymous_id: anonymousUserId.value
       })
-      
+
       if (response.data.success) {
         authToken.value = response.data.token
         currentUser.value = response.data.user
@@ -165,7 +165,7 @@ export function useUser() {
         password_confirmation: passwordConfirmation,
         anonymous_id: anonymousUserId.value
       })
-      
+
       if (response.data.success) {
         authToken.value = response.data.token
         currentUser.value = response.data.user
@@ -178,6 +178,13 @@ export function useUser() {
         errors: error.response?.data?.errors || { general: ['Registration failed'] }
       }
     }
+  }
+
+  const loginWithToken = async (token) => {
+    authToken.value = token
+    localStorage.setItem('loveverse_auth_token', token)
+
+    await loadCurrentUser()
   }
 
   // Logout
@@ -237,6 +244,7 @@ export function useUser() {
     saveDraft,
     clearDraft,
     login,
+    loginWithToken,
     register,
     logout,
     checkLimits,

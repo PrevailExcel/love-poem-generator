@@ -74,13 +74,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, provide } from 'vue'
+import { ref, onMounted, onUnmounted,provide } from 'vue'
 import { useUser } from '@/composables/useUser'
 import { User, Crown, LogOut, Sparkles, Heart } from 'lucide-vue-next'
 import LoginModal from '@/components/LoginModal.vue'
 import RegisterModal from '@/components/RegisterModal.vue'
 
-const { isAuthenticated, isPremium, currentUser, credits, logout } = useUser()
+const { isAuthenticated, isPremium, currentUser, credits, loginWithToken, logout } = useUser()
 
 const showLoginModal = ref(false)
 const showRegisterModal = ref(false)
@@ -107,6 +107,29 @@ provide('openLoginModal', () => {
 
 provide('openRegisterModal', () => {
   showRegisterModal.value = true
+})
+
+const FRONTEND_API_ORIGIN = new URL("http://127.0.0.1:8001").origin
+
+const handleAuthMessage = (event) => {
+  if (event.origin !== FRONTEND_API_ORIGIN) return
+  console.log("Received auth message:", event.data)
+
+  if (event.data?.token) {
+    loginWithToken(event.data.token)
+    //close modals if open
+    showLoginModal.value = false
+    showRegisterModal.value = false
+  }
+}
+
+
+onMounted(() => {
+  window.addEventListener('message', handleAuthMessage)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('message', handleAuthMessage)
 })
 </script>
 

@@ -36,7 +36,7 @@
             </div>
             
             <!-- Large Watermark -->
-            <div class="large-watermark">dear.luv</div>
+            <div class="large-watermark">dear luv</div>
           </div>
 
           <div v-if="!usePhotoBackground" class="poem-background-overlay"></div>
@@ -48,21 +48,61 @@
               </div>
             </div>
 
-            <div class="poem-text" :class="{ 'photo-bg-text': usePhotoBackground }">
-              {{ currentPoem }}
-            </div>
+<template v-if="!isAuthenticated">
+              <div class="visible-lines">
+                <p v-for="(line, index) in visibleLines" :key="index" class="poem-line">
+                  {{ line }}
+                </p>
+              </div>
+              
+              <!-- Remaining lines - blurred -->
+              <div class="locked-lines">
+                <div class="blur-overlay">
+                  <p v-for="(line, index) in lockedLines" :key="index" class="poem-line blurred">
+                    {{ line }}
+                  </p>
+                </div>
+                
+                <div class="lock-indicator">
+                  <Lock :size="32" />
+                </div>
 
+                <!-- Unlock Prompt (if locked) -->
+                <div class="unlock-prompt">
+                  <h3 class="prompt-title">This poem is ready.</h3>
+                  <p class="prompt-text">Create a free account to receive it.</p>
+
+                  <div class="auth-buttons">
+                    <button @click="handleContinueWithEmail" class="btn btn-google">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+                        <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.438 15.983 5.482 18 9.003 18z" fill="#34A853"/>
+                        <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                        <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.482 0 2.438 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
+                      </svg>
+                      Continue with Google
+                    </button>
+                  </div>
+
+                  <p class="helper-text">3 free poems included</p>
+                </div>
+              </div>
+              </template>
+
+              <!-- Full poem visible for authenticated users -->
+               <template v-else>
+              <div class="full-poem">
+               {{ currentPoem }}
+              </div>
+</template>
             <div class="poem-footer">
               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
-              <div class="footer-right">
-               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-           <!-- Customization Bar -->
+      <!-- Customization Bar -->
       <div class="customization-bar">
         <!-- Photo Background Toggle (Premium Feature) -->
         <div v-if="poemDraft.photoPreview" class="customization-section photo-bg-section">
@@ -140,7 +180,6 @@
         </div>
       </div>
 
-
       <!-- Action Buttons -->
       <div class="action-buttons">
         <button class="action-btn tooltip-trigger" @click="copyPoem">
@@ -198,31 +237,48 @@
     />
     <CopiedModal v-if="showCopiedModal" @close="showCopiedModal = false" :message="copiedMessage" />
     <LimitModal v-if="showLimitModal" @close="showLimitModal = false" />
+    
+    <!-- Auth Modals -->
+    <LoginModal 
+      v-if="showLoginModal" 
+      @close="showLoginModal = false"
+      @switchToRegister="switchToRegister"
+    />
+    
+    <RegisterModal 
+      v-if="showRegisterModal" 
+      @close="showRegisterModal = false"
+      @switchToLogin="switchToLogin"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUser } from '@/composables/useUser'
 import { poemStyles } from '@/composables/usePoemGenerator'
-import { Heart, Copy, Share2, Save, Sparkles, Check, Palette, Type, Link, Download, Crown, Image as ImageIcon } from 'lucide-vue-next'
+import { Heart, Copy, Share2, Save, Sparkles, Check, Palette, Type, Link, Download, Crown, Lock, Mail, Image as ImageIcon } from 'lucide-vue-next'
+
 import SaveModal from '@/components/SaveModal.vue'
 import ShareImageModal from '@/components/ShareImageModal.vue'
 import CopiedModal from '@/components/CopiedModal.vue'
 import LimitModal from '@/components/LimitModal.vue'
+import LoginModal from '@/components/LoginModal.vue'
+import RegisterModal from '@/components/RegisterModal.vue'
 import html2canvas from 'html2canvas'
-import * as htmlToImage from 'html-to-image';
 
 const route = useRoute()
 const router = useRouter()
-const { poemDraft, currentPoem, canGenerate, clearDraft } = useUser()
+const { poemDraft, currentPoem, canGenerate, clearDraft, isAuthenticated, isPremium, loginWithGoogle } = useUser()
 
 const isGenerating = computed(() => route.params.id === 'generating')
 const showSaveModal = ref(false)
 const showShareImageModal = ref(false)
 const showCopiedModal = ref(false)
 const showLimitModal = ref(false)
+const showLoginModal = ref(false)
+const showRegisterModal = ref(false)
 const copiedMessage = ref('Copied!')
 const generatedImageUrl = ref(null)
 const generatedImages = ref([])
@@ -235,7 +291,6 @@ const previewBackground = ref(null)
 const selectedBackground = ref('gradient-rose')
 const selectedFont = ref('serif-elegant')
 const usePhotoBackground = ref(false)
-const isPremium = ref(false) // In production, check user subscription status
 
 const backgrounds = [
   { 
@@ -295,6 +350,36 @@ const selectedStyleName = computed(() => {
   return style ? style.name : ''
 })
 
+// Split poem into lines
+const poemLines = computed(() => {
+  return currentPoem.value.split('\n').filter(line => line.trim())
+})
+
+// First 2-3 lines visible
+const visibleLines = computed(() => {
+  return poemLines.value.slice(0, 3)
+})
+
+// Remaining lines locked
+const lockedLines = computed(() => {
+  return poemLines.value.slice(3)
+})
+
+const handleContinueWithEmail = () => {
+  // Show registration modal by default for new users
+  showRegisterModal.value = true
+}
+
+const switchToRegister = () => {
+  showLoginModal.value = false
+  showRegisterModal.value = true
+}
+
+const switchToLogin = () => {
+  showRegisterModal.value = false
+  showLoginModal.value = true
+}
+
 const createSparkle = () => {
   if (!sparklesContainer.value) return
   
@@ -315,24 +400,14 @@ const createSparkle = () => {
 const changeBackground = (bgId) => {
   if (usePhotoBackground.value) return
   selectedBackground.value = bgId
-  createSparkle()
-  createSparkle()
-  createSparkle()
 }
 
 const changeFont = (fontId) => {
   selectedFont.value = fontId
-  createSparkle()
-  createSparkle()
 }
 
 const togglePhotoBackground = () => {
   usePhotoBackground.value = !usePhotoBackground.value
-  if (usePhotoBackground.value) {
-    createSparkle()
-    createSparkle()
-    createSparkle()
-  }
 }
 
 const copyPoem = async () => {
@@ -361,58 +436,28 @@ const copyLink = async () => {
     console.error('Failed to copy link:', error)
   }
 }
+
 const generateImage = async () => {
-  try {
-    const node = poemCard.value;
-
-    // Wait for fonts to be 100% ready
-    await document.fonts.ready;
-
-    // Generate PNG directly (skipping the manual canvas redraw to avoid quality loss)
-    const dataUrl = await htmlToImage.toPng(node, {
-      quality: 1,
-      pixelRatio: 4, // Increased to 4 for extreme crispness
-      cacheBust: true,
-      style: {
-        // FORCE the text to be thick and pure white during capture
-        // This overrides any CSS variables that might be failing
-        color: usePhotoBackground.value ? '#ffffff' : '#1a1a1a', 
-        fontWeight: 'bold', // Give the font more "meat"
-        textShadow: usePhotoBackground.value 
-          ? '0 0 1px #000, 0 0 1px #000' // Tiny dark outline to make white pop
-          : 'none',
-      },
-      // Ensure specific classes get a boost
-      filter: (domNode) => {
-        if (domNode.classList?.contains('photo-bg-text')) {
-           domNode.style.webkitTextStroke = "0.5px white"; // The secret weapon
-           domNode.style.opacity = "1";
-        }
-        return true;
-      }
-    });
-
-    // Convert to Image object for the return
-    const img = new Image();
-    img.src = dataUrl;
-    
-    return new Promise((resolve) => {
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas);
-      };
-    });
-  } catch (error) {
-    console.error('Export failed:', error);
-  }
+  const canvas = await html2canvas(poemCard.value, {
+    backgroundColor: null,
+    scale: 3,
+    useCORS: true,
+    logging: false,
+    width: poemCard.value.offsetWidth,
+    height: poemCard.value.scrollHeight,
+    onclone: (clonedDoc) => {
+      const texts = clonedDoc.querySelectorAll('.photo-bg-text');
+      texts.forEach(el => {
+        el.style.color = '#ffffff';
+        el.style.textShadow = '0px 0px 2px rgba(0,0,0,0.5)';
+        el.style.fontWeight = '600';
+      });
+    }
+  });
+  return canvas;
 };
 
 const shareAsImage = async () => {
-  // Check if using photo background without premium
   if (usePhotoBackground.value && !isPremium.value) {
     copiedMessage.value = '⭐ Upgrade to Premium'
     showCopiedModal.value = true
@@ -511,6 +556,38 @@ onMounted(() => {
   padding: 2rem;
   animation: fadeIn 0.8s ease-out;
   position: relative;
+}
+
+.locked-lines {
+  position: relative;
+  min-height: 100px;
+}
+
+.blur-overlay {
+  filter: blur(4px);
+  opacity: 0.4;
+  user-select: none;
+  pointer-events: none;
+}
+
+.blurred {
+  color: var(--color-ink);
+}
+
+.lock-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(139, 71, 93, 0.2);
+  color: var(--color-rose);
 }
 
 /* Sparkles Animation */
@@ -941,15 +1018,9 @@ onMounted(() => {
 .photo-bg-text {
   color: white !important;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-  /* This creates a tiny 'halo' that prevents the library from 
-     anti-aliasing the edges into transparency */
-  text-shadow: 0px 0px 0.5px rgba(255, 255, 255, 0.8), 
-               0px 0px 0.5px rgba(255, 255, 255, 0.8);
-               
-  /* Force the renderer to be aggressive */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
+  -webkit-text-stroke: 0.2px white;
 }
 
 .poem-card.has-photo-bg .poem-for {
@@ -973,7 +1044,7 @@ onMounted(() => {
 
 .poem-content {
   position: relative;
-  z-index: 99;
+  z-index: 3;
   width: 100%;
 }
 
@@ -1010,7 +1081,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #DCC7E8 0%, #C5A8D9 50%, #F0E6F5 100%);
 }
 
-/* Font Styles with Text Shadows */
+/* Font Styles */
 .poem-card.font-serif-elegant .poem-text {
   font-family: var(--font-serif);
 }
@@ -1091,6 +1162,10 @@ onMounted(() => {
   transition: font-family 0.3s ease;
 }
 
+.poem-line {
+  margin: 0.5rem 0;
+}
+
 .poem-footer {
   display: flex;
   justify-content: space-between;
@@ -1111,6 +1186,83 @@ onMounted(() => {
   font-family: var(--font-script);
   color: var(--color-rose-light);
   font-size: 0.875rem;
+}
+
+/* Unlock Prompt */
+.unlock-prompt {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, rgba(139, 71, 93, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%);
+  border-radius: 16px;
+  margin-top: 2rem;
+}
+
+.prompt-title {
+  font-family: var(--font-serif) !important;
+  font-size: 1.75rem;
+  color: var(--color-rose-dark);
+  margin-bottom: 0.5rem;
+}
+
+.prompt-text {
+  font-size: 1.125rem;
+  color: var(--color-ink);
+  opacity: 0.8;
+  margin-bottom: 2rem;
+}
+
+.auth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto 1rem;
+}
+
+.btn-google,
+.btn-email {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid;
+}
+
+.btn-google {
+  background: white;
+  border-color: #dadce0;
+  color: #3c4043;
+}
+
+.btn-google:hover {
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-email {
+  background: var(--color-rose);
+  border-color: var(--color-rose);
+  color: white;
+}
+
+.btn-email:hover {
+  background: var(--color-rose-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 71, 93, 0.3);
+}
+
+.helper-text {
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  opacity: 0.6;
+  margin-top: 1rem;
 }
 
 /* Action Buttons with Tooltips */
