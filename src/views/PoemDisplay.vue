@@ -91,9 +91,9 @@
 
               <!-- Full poem visible for authenticated users -->
                <template v-else>
-              <div class="full-poem">
-               {{ currentPoem }}
-              </div>
+              <div class="poem-text" :class="{ 'photo-bg-text': usePhotoBackground }">
+              {{ currentPoem }}
+            </div>
 </template>
             <div class="poem-footer">
               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
@@ -250,6 +250,13 @@
       @close="showRegisterModal = false"
       @switchToLogin="switchToLogin"
     />
+
+    <!-- Paywall Modal -->
+    <PaywallModal
+      v-if="showPaywallModal"
+      @close="showPaywallModal = false"
+      @purchaseComplete="handlePurchaseComplete"
+    />
   </div>
 </template>
 
@@ -265,13 +272,20 @@ import ShareImageModal from '@/components/ShareImageModal.vue'
 import CopiedModal from '@/components/CopiedModal.vue'
 import LimitModal from '@/components/LimitModal.vue'
 import LoginModal from '@/components/LoginModal.vue'
+import PaywallModal from '@/components/PaywallModal.vue'
 import RegisterModal from '@/components/RegisterModal.vue'
 import html2canvas from 'html2canvas'
 
 const route = useRoute()
 const router = useRouter()
-const { poemDraft, currentPoem, canGenerate, clearDraft, isAuthenticated, isPremium, loginWithGoogle } = useUser()
+const { poemDraft, currentPoem, canGenerate, clearDraft, isAuthenticated, isPremium,
+  credits,
+  isCurrentPoemUnlocked,
+  unlockPoem,
+  loadCredits
+} = useUser()
 
+const showPaywallModal = ref(false)
 const isGenerating = computed(() => route.params.id === 'generating')
 const showSaveModal = ref(false)
 const showShareImageModal = ref(false)
@@ -380,23 +394,6 @@ const switchToLogin = () => {
   showLoginModal.value = true
 }
 
-const createSparkle = () => {
-  if (!sparklesContainer.value) return
-  
-  const sparkle = document.createElement('div')
-  sparkle.className = 'sparkle'
-  sparkle.innerHTML = '✨'
-  sparkle.style.left = Math.random() * 100 + '%'
-  sparkle.style.top = Math.random() * 100 + '%'
-  sparkle.style.animationDuration = (Math.random() * 1 + 0.5) + 's'
-  
-  sparklesContainer.value.appendChild(sparkle)
-  
-  setTimeout(() => {
-    sparkle.remove()
-  }, 1500)
-}
-
 const changeBackground = (bgId) => {
   if (usePhotoBackground.value) return
   selectedBackground.value = bgId
@@ -408,6 +405,22 @@ const changeFont = (fontId) => {
 
 const togglePhotoBackground = () => {
   usePhotoBackground.value = !usePhotoBackground.value
+}
+
+const handleRequestUnlock = () => {
+  if (!isAuthenticated.value) {
+    if (openRegisterModal) {
+      openRegisterModal()
+    }
+  } else if (credits.value === 0) {
+    showPaywallModal.value = true
+  }
+}
+
+const handlePurchaseComplete = async () => {
+  showPaywallModal.value = false
+  await loadCredits()
+  await autoUnlock()
 }
 
 const copyPoem = async () => {
@@ -546,7 +559,22 @@ onMounted(() => {
   link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Sacramento&family=Josefin+Sans:wght@300;400&family=Kalam:wght@300;400;700&display=swap'
   link.rel = 'stylesheet'
   document.head.appendChild(link)
+
+    // If user just logged in and has credits, auto-unlock
+  if (isAuthenticated.value && credits.value > 0 && !isCurrentPoemUnlocked.value) {
+    autoUnlock()
+  }
 })
+
+
+const autoUnlock = async () => {
+  if (currentPoemId.value) {
+    const result = await unlockPoem(currentPoemId.value)
+    if (result.success) {
+      isCurrentPoemUnlocked.value = true
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -1163,7 +1191,10 @@ onMounted(() => {
 }
 
 .poem-line {
-  margin: 0.5rem 0;
+  font-size: 1.375rem;
+  line-height:1.3;
+  margin: 1rem;
+  text-align: center;
 }
 
 .poem-footer {

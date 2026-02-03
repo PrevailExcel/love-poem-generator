@@ -6,7 +6,7 @@ const authToken = ref(null)
 const currentUser = ref(null)
 const generationCount = ref(0)
 const remainingGenerations = ref(2)
-const credits = ref(0) // Pay-per-poem credits
+const credits = ref(0) 
 const poemDraft = ref({
   name: '',
   description: '',

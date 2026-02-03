@@ -65,7 +65,7 @@ const switchToRegister = () => {
 
 const loginWithGoogle = () => {
   loading.value = true
-  const url = `http://127.0.0.1:8001/auth/google`
+  const url = `https://dearluv.iquest.com.ng/auth/google`
 
   const popup = window.open(
     url,

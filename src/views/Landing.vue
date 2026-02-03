@@ -1,10 +1,12 @@
 <template>
   <div class="landing">
     <div class="hero">
-      <h1 class="hero-title">Love, written gently</h1>
-      <p class="hero-subtitle">Say it better. Say it from the heart.</p>
+      <h1 class="hero-title">For the words you can’t find</h1>
+      <p class="hero-subtitle">
+        Dear.luv helps you turn feelings into words that come straight from your heart.
+      </p>
       <p class="hero-description">
-        LoveVerse helps you turn feelings into words that feel warm, real, and unmistakably yours.
+        Because the right words change everything.
       </p>
       <button class="cta-button" @click="startCreating">Create Your Poem</button>
       <p class="no-account">No account required • Free to start</p>
