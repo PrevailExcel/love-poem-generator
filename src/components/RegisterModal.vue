@@ -31,54 +31,21 @@
 <script setup>
 import { ref } from 'vue'
 import { useUser } from '@/composables/useUser'
-import { UserPlus, Loader } from 'lucide-vue-next'
 import BaseModal from './BaseModal.vue'
 
 const emit = defineEmits(['close', 'switchToLogin'])
 
-const { register } = useUser()
+const { anonymousUserId } = useUser()
 
-const name = ref('')
-const email = ref('')
-const password = ref('')
 const loading = ref(false)
-const errors = ref({})
-const generalError = ref(null)
-
-const handleRegister = async () => {
-  loading.value = true
-  errors.value = {}
-  generalError.value = null
-
-  const result = await register(
-    name.value,
-    email.value,
-    password.value,
-  )
-
-  if (result.success) {
-    emit('close')
-    // window.location.reload() // Reload to update user state
-  } else {
-    if (result.errors) {
-      errors.value = result.errors
-      generalError.value = result.errors.general?.[0] || 'Registration failed. Please try again.'
-    } else {
-      generalError.value = 'Registration failed. Please try again.'
-    }
-  }
-
-  loading.value = false
-}
 
 const switchToLogin = () => {
   emit('switchToLogin')
 }
 
-
 const loginWithGoogle = () => {
   loading.value = true
-  const url = `https://dearluv.iquest.com.ng/auth/google`
+  const url = `http://localhost:8001/auth/google?anonymous_id=${anonymousUserId}`
 
   const popup = window.open(
     url,

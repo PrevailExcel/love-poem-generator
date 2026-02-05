@@ -105,6 +105,8 @@ const handleGenerate = async () => {
       currentPoem.value = result.poem.content
       currentPoemId.value = result.poem.id
       
+      console.log("poem", result)
+      
       // Update remaining generations
       if (result.remaining !== undefined) {
         remainingGenerations.value = result.remaining

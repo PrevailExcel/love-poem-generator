@@ -13,34 +13,30 @@
 
     <!-- Poem Display -->
     <div v-else-if="currentPoem" class="poem-display">
- 
+
       <!-- Poem Card with Canvas -->
       <div class="poem-card-wrapper" ref="poemCardWrapper">
-        <div 
-          class="poem-card" 
-          ref="poemCard"
-          :class="[
-            `bg-${selectedBackground}`,
-            `font-${selectedFont}`,
-            { 'has-photo-bg': usePhotoBackground && poemDraft.photoPreview }
-          ]"
-        >
+        <div class="poem-card" ref="poemCard" :class="[
+          `bg-${selectedBackground}`,
+          `font-${selectedFont}`,
+          { 'has-photo-bg': usePhotoBackground && poemDraft.photoPreview }
+        ]">
           <!-- Photo Background (Premium Feature) -->
           <div v-if="usePhotoBackground && poemDraft.photoPreview" class="photo-background">
             <img :src="poemDraft.photoPreview" alt="Background" class="bg-image" />
             <div class="photo-overlay"></div>
-            
+
             <!-- Floating Bubbles -->
             <div class="bubbles">
               <div class="bubble" v-for="n in 15" :key="n"></div>
             </div>
-            
+
             <!-- Large Watermark -->
             <div class="large-watermark">dear luv</div>
           </div>
 
           <div v-if="!usePhotoBackground" class="poem-background-overlay"></div>
-          
+
           <div class="poem-content">
             <div class="poem-header" v-if="poemDraft.name">
               <div class="poem-for" :class="{ 'photo-bg-text': usePhotoBackground }">
@@ -48,53 +44,75 @@
               </div>
             </div>
 
-<template v-if="!isAuthenticated">
+            <template v-if="!canViewFullPoem">
               <div class="visible-lines">
                 <p v-for="(line, index) in visibleLines" :key="index" class="poem-text poem-line">
                   {{ line }}
                 </p>
               </div>
-              
+
               <!-- Remaining lines - blurred -->
               <div class="locked-lines">
                 <div class="blur-overlay">
-                  <p v-for="(line, index) in lockedLines" :key="index" class="poem-line blurred">
+                  <p v-for="(line, index) in lockedLines" :key="index" class="poem-text poem-line blurred">
                     {{ line }}
                   </p>
                 </div>
-                
+
                 <div class="lock-indicator">
                   <Lock :size="32" />
                 </div>
 
                 <!-- Unlock Prompt (if locked) -->
                 <div class="unlock-prompt">
-                  <h3 class="prompt-title">This poem is ready.</h3>
-                  <p class="prompt-text">Create a free account to receive it.</p>
+                  <template v-if="!isAuthenticated">
+                    <h3 class="prompt-title">This poem is ready.</h3>
+                    <p class="prompt-text">Create a free account to receive it.</p>
 
-                  <div class="auth-buttons">
-                    <button @click="handleContinueWithEmail" class="btn btn-google">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                        <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.438 15.983 5.482 18 9.003 18z" fill="#34A853"/>
-                        <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-                        <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.482 0 2.438 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
-                      </svg>
-                      Continue with Google
+                    <div class="auth-buttons">
+                      <button @click="handleContinueWithEmail" class="btn btn-google">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                          <path
+                            d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+                            fill="#4285F4" />
+                          <path
+                            d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.438 15.983 5.482 18 9.003 18z"
+                            fill="#34A853" />
+                          <path
+                            d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
+                            fill="#FBBC05" />
+                          <path
+                            d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.482 0 2.438 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z"
+                            fill="#EA4335" />
+                        </svg>
+                        Continue with Google
+                      </button>
+                    </div>
+
+                    <p class="helper-text">3 free poems included</p>
+                  </template>
+
+                  <!-- AUTHENTICATED BUT NO CREDITS -->
+                  <template v-else>
+                    <h3 class="prompt-title">You’ve used your free poems</h3>
+                    <p class="prompt-text">
+                      Unlock this poem by getting more credits.
+                    </p>
+
+                    <button @click="showPaywallModal = true" class="btn btn-primary">
+                      Unlock poem
                     </button>
-                  </div>
-
-                  <p class="helper-text">3 free poems included</p>
+                  </template>
                 </div>
               </div>
-              </template>
+            </template>
 
-              <!-- Full poem visible for authenticated users -->
-               <template v-else>
+            <!-- Full poem visible for authenticated users -->
+            <template v-else>
               <div class="poem-text" :class="{ 'photo-bg-text': usePhotoBackground }">
-              {{ currentPoem }}
-            </div>
-</template>
+                {{ currentPoem }}
+              </div>
+            </template>
             <div class="poem-footer">
               <span class="watermark" :class="{ 'photo-bg-text': usePhotoBackground }">dear.luv</span>
             </div>
@@ -115,14 +133,10 @@
             </span>
           </h4>
           <div class="photo-bg-toggle">
-            <button 
-              class="toggle-btn"
-              :class="{ active: usePhotoBackground }"
-              @click="togglePhotoBackground"
-            >
+            <button class="toggle-btn" :class="{ active: usePhotoBackground }" @click="togglePhotoBackground">
               <Check v-if="usePhotoBackground" :size="16" />
               {{ usePhotoBackground ? 'Photo Background Active' : 'Use Photo as Background' }}
-            </button>
+            </button>            
             <p class="toggle-hint">
               {{ usePhotoBackground ? '✨ Beautiful! Upgrade to download & share without watermark' : 'Click to preview premium photo background' }}
             </p>
@@ -136,18 +150,10 @@
             <span v-if="usePhotoBackground" class="disabled-label">(Disabled with photo)</span>
           </h4>
           <div class="background-options">
-            <button
-              v-for="bg in backgrounds"
-              :key="bg.id"
-              class="background-option"
-              :class="{ active: selectedBackground === bg.id }"
-              :style="{ background: bg.preview }"
-              @click="changeBackground(bg.id)"
-              @mouseenter="previewBackground = bg.id"
-              @mouseleave="previewBackground = null"
-              :title="bg.name"
-              :disabled="usePhotoBackground"
-            >
+            <button v-for="bg in backgrounds" :key="bg.id" class="background-option"
+              :class="{ active: selectedBackground === bg.id }" :style="{ background: bg.preview }"
+              @click="changeBackground(bg.id)" @mouseenter="previewBackground = bg.id"
+              @mouseleave="previewBackground = null" :title="bg.name" :disabled="usePhotoBackground">
               <Check v-if="selectedBackground === bg.id" :size="20" class="check-icon" />
               <span class="bg-name">{{ bg.name }}</span>
             </button>
@@ -160,13 +166,8 @@
             Font Style
           </h4>
           <div class="font-options">
-            <button
-              v-for="font in fonts"
-              :key="font.id"
-              class="font-option"
-              :class="{ active: selectedFont === font.id }"
-              @click="changeFont(font.id)"
-            >
+            <button v-for="font in fonts" :key="font.id" class="font-option"
+              :class="{ active: selectedFont === font.id }" @click="changeFont(font.id)">
               <span :style="{ fontFamily: font.family }" class="font-sample">{{ font.name }}</span>
             </button>
           </div>
@@ -190,14 +191,16 @@
         <button class="action-btn action-btn-primary tooltip-trigger" @click="shareAsImage">
           <Share2 :size="20" :stroke-width="2" />
           Share as Image
-          <span class="tooltip">{{ usePhotoBackground && !isPremium ? '⭐ Premium Feature' : 'Share this poem ❤️' }}</span>
+          <span class="tooltip">{{ usePhotoBackground && !isPremium ? '⭐ Premium Feature' : 'Share this poem ❤️'
+            }}</span>
         </button>
         <button class="action-btn tooltip-trigger" @click="copyLink">
           <Link :size="20" :stroke-width="2" />
           Copy Link
           <span class="tooltip">Share poem link</span>
         </button>
-        <button class="action-btn tooltip-trigger" @click="showSaveModal = true">
+
+        <button v-if="!isAuthenticated" class="action-btn tooltip-trigger" @click="showLoginModal = true">
           <Save :size="20" :stroke-width="2" />
           Save Forever
           <span class="tooltip">Create account to save</span>
@@ -230,38 +233,23 @@
 
     <!-- Modals -->
     <SaveModal v-if="showSaveModal" @close="showSaveModal = false" />
-    <ShareImageModal 
-      v-if="showShareImageModal" 
-      @close="showShareImageModal = false" 
-      :imageUrl="generatedImageUrl"
-    />
+    <ShareImageModal v-if="showShareImageModal" @close="showShareImageModal = false" :imageUrl="generatedImageUrl" />
     <CopiedModal v-if="showCopiedModal" @close="showCopiedModal = false" :message="copiedMessage" />
     <LimitModal v-if="showLimitModal" @close="showLimitModal = false" />
-    
+
     <!-- Auth Modals -->
-    <LoginModal 
-      v-if="showLoginModal" 
-      @close="showLoginModal = false"
-      @switchToRegister="switchToRegister"
-    />
-    
-    <RegisterModal 
-      v-if="showRegisterModal" 
-      @close="showRegisterModal = false"
-      @switchToLogin="switchToLogin"
-    />
+    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" @switchToRegister="switchToRegister" />
+
+    <RegisterModal v-if="showRegisterModal" @close="showRegisterModal = false" @switchToLogin="switchToLogin" />
 
     <!-- Paywall Modal -->
-    <PaywallModal
-      v-if="showPaywallModal"
-      @close="showPaywallModal = false"
-      @purchaseComplete="handlePurchaseComplete"
-    />
+    <PaywallModal v-if="showPaywallModal" @close="showPaywallModal = false"
+      @purchaseComplete="handlePurchaseComplete" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUser } from '@/composables/useUser'
 import { poemStyles } from '@/composables/usePoemGenerator'
@@ -307,43 +295,43 @@ const selectedFont = ref('serif-elegant')
 const usePhotoBackground = ref(false)
 
 const backgrounds = [
-  { 
-    id: 'gradient-rose', 
+  {
+    id: 'gradient-rose',
     name: 'Rose Sunset',
     preview: 'linear-gradient(135deg, #FFE5E5 0%, #FFD6E8 50%, #FFF0F5 100%)'
   },
-  { 
-    id: 'gradient-lavender', 
+  {
+    id: 'gradient-lavender',
     name: 'Lavender Dreams',
     preview: 'linear-gradient(135deg, #E8DAEF 0%, #D5C6E0 50%, #F5F0FA 100%)'
   },
-  { 
-    id: 'gradient-peach', 
+  {
+    id: 'gradient-peach',
     name: 'Peach Glow',
     preview: 'linear-gradient(135deg, #FFE8D6 0%, #FFDAB9 50%, #FFF5E6 100%)'
   },
-  { 
-    id: 'gradient-mint', 
+  {
+    id: 'gradient-mint',
     name: 'Mint Fresh',
     preview: 'linear-gradient(135deg, #D4F1F4 0%, #C8E9E1 50%, #E8F8F5 100%)'
   },
-  { 
-    id: 'paper-vintage', 
+  {
+    id: 'paper-vintage',
     name: 'Vintage Paper',
     preview: 'linear-gradient(135deg, #F5EDE4 0%, #EDE2D5 50%, #FAF3EA 100%)'
   },
-  { 
-    id: 'gradient-sunset', 
+  {
+    id: 'gradient-sunset',
     name: 'Golden Hour',
     preview: 'linear-gradient(135deg, #FFD89B 0%, #FFC98B 50%, #FFE8C5 100%)'
   },
-  { 
-    id: 'gradient-ocean', 
+  {
+    id: 'gradient-ocean',
     name: 'Ocean Breeze',
     preview: 'linear-gradient(135deg, #A8E6CF 0%, #88D4AB 50%, #C8F2E0 100%)'
   },
-  { 
-    id: 'gradient-mauve', 
+  {
+    id: 'gradient-mauve',
     name: 'Soft Mauve',
     preview: 'linear-gradient(135deg, #DCC7E8 0%, #C5A8D9 50%, #F0E6F5 100%)'
   }
@@ -407,15 +395,12 @@ const togglePhotoBackground = () => {
   usePhotoBackground.value = !usePhotoBackground.value
 }
 
-const handleRequestUnlock = () => {
-  if (!isAuthenticated.value) {
-    if (openRegisterModal) {
-      openRegisterModal()
-    }
-  } else if (credits.value === 0) {
-    showPaywallModal.value = true
-  }
-}
+const hasCredits = computed(() => credits.value > 0)
+
+const canViewFullPoem = computed(() => {
+  return isAuthenticated.value && hasCredits.value
+})
+
 
 const handlePurchaseComplete = async () => {
   showPaywallModal.value = false
@@ -424,6 +409,14 @@ const handlePurchaseComplete = async () => {
 }
 
 const copyPoem = async () => {
+  if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  } else if (!canViewFullPoem.value) {
+    showPaywallModal.value = true
+    return
+  }
+
   try {
     await navigator.clipboard.writeText(currentPoem.value)
     copiedMessage.value = 'Poem copied!'
@@ -437,6 +430,14 @@ const copyPoem = async () => {
 }
 
 const copyLink = async () => {
+    if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  } else if (!canViewFullPoem.value) {
+    showPaywallModal.value = true
+    return
+  }
+
   try {
     const url = window.location.href
     await navigator.clipboard.writeText(url)
@@ -451,6 +452,14 @@ const copyLink = async () => {
 }
 
 const generateImage = async () => {
+    if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  } else if (!canViewFullPoem.value) {
+    showPaywallModal.value = true
+    return
+  }
+
   const canvas = await html2canvas(poemCard.value, {
     backgroundColor: null,
     scale: 3,
@@ -471,6 +480,14 @@ const generateImage = async () => {
 };
 
 const shareAsImage = async () => {
+    if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  } else if (!canViewFullPoem.value) {
+    showPaywallModal.value = true
+    return
+  }
+
   if (usePhotoBackground.value && !isPremium.value) {
     copiedMessage.value = '⭐ Upgrade to Premium'
     showCopiedModal.value = true
@@ -485,7 +502,7 @@ const shareAsImage = async () => {
     const canvas = await generateImage()
     canvas.toBlob(async (blob) => {
       const file = new File([blob], 'dearluv-poem.png', { type: 'image/png' })
-      
+
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
@@ -510,6 +527,14 @@ const shareAsImage = async () => {
 }
 
 const downloadImage = (canvas) => {
+    if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  } else if (!canViewFullPoem.value) {
+    showPaywallModal.value = true
+    return
+  }
+
   const link = document.createElement('a')
   link.download = 'dearluv-poem.png'
   link.href = canvas.toDataURL('image/png')
@@ -517,6 +542,14 @@ const downloadImage = (canvas) => {
 }
 
 const downloadSingleImage = (url, index) => {
+    if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  } else if (!canViewFullPoem.value) {
+    showPaywallModal.value = true
+    return
+  }
+
   const link = document.createElement('a')
   link.download = `dearluv-poem-${index + 1}.png`
   link.href = url
@@ -524,11 +557,19 @@ const downloadSingleImage = (url, index) => {
 }
 
 const shareSingleImage = async (url) => {
+    if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  } else if (!canViewFullPoem.value) {
+    showPaywallModal.value = true
+    return
+  }
+
   try {
     const response = await fetch(url)
     const blob = await response.blob()
     const file = new File([blob], 'dearluv-poem.png', { type: 'image/png' })
-    
+
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
@@ -553,14 +594,14 @@ onMounted(() => {
   if (!currentPoem.value && !isGenerating.value) {
     router.push('/')
   }
-  
+
   // Load additional fonts
   const link = document.createElement('link')
   link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Sacramento&family=Josefin+Sans:wght@300;400&family=Kalam:wght@300;400;700&display=swap'
   link.rel = 'stylesheet'
   document.head.appendChild(link)
 
-    // If user just logged in and has credits, auto-unlock
+  // If user just logged in and has credits, auto-unlock
   if (isAuthenticated.value && credits.value > 0 && !isCurrentPoemUnlocked.value) {
     autoUnlock()
   }
@@ -575,6 +616,22 @@ const autoUnlock = async () => {
     }
   }
 }
+
+// watch(
+//   () => ({
+//     isAuthenticated: isAuthenticated.value,
+//     credits: credits.value,
+//   }),
+//   ({ isAuthenticated, credits }) => {
+//     if (isAuthenticated && credits === 0) {
+//       showPaywallModal.value = true
+//     } else {
+//       showPaywallModal.value = false
+//     }
+//   },
+//   { immediate: true }
+// )
+
 </script>
 
 <style scoped>
@@ -636,13 +693,14 @@ const autoUnlock = async () => {
 }
 
 @keyframes sparkle {
-  0% { 
-    transform: scale(0) rotate(0deg); 
-    opacity: 1; 
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
   }
-  100% { 
-    transform: scale(1.5) rotate(360deg); 
-    opacity: 0; 
+
+  100% {
+    transform: scale(1.5) rotate(360deg);
+    opacity: 0;
   }
 }
 
@@ -852,6 +910,7 @@ const autoUnlock = async () => {
     opacity: 0;
     transform: translateY(-50%) translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(-50%) translateX(0);
@@ -901,9 +960,19 @@ const autoUnlock = async () => {
 }
 
 @keyframes bounceLetters {
-  0%, 100% { transform: translateY(0); }
-  25% { transform: translateY(-3px); }
-  75% { transform: translateY(-3px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  25% {
+    transform: translateY(-3px);
+  }
+
+  75% {
+    transform: translateY(-3px);
+  }
 }
 
 .font-option:hover {
@@ -965,10 +1034,10 @@ const autoUnlock = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(139, 71, 93, 0.85) 0%, 
-    rgba(92, 46, 61, 0.75) 50%,
-    rgba(139, 71, 93, 0.85) 100%);
+  background: linear-gradient(135deg,
+      rgba(139, 71, 93, 0.85) 0%,
+      rgba(92, 46, 61, 0.75) 50%,
+      rgba(139, 71, 93, 0.85) 100%);
 }
 
 /* Floating Bubbles */
@@ -985,42 +1054,142 @@ const autoUnlock = async () => {
   bottom: -100px;
   width: 40px;
   height: 40px;
-  background: radial-gradient(circle at 30% 30%, 
-    rgba(255, 255, 255, 0.3), 
-    rgba(255, 255, 255, 0.05));
+  background: radial-gradient(circle at 30% 30%,
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0.05));
   border-radius: 50%;
   opacity: 0.4;
   animation: rise 6s infinite ease-in;
   box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.bubble:nth-child(1) { left: 10%; width: 30px; height: 30px; animation-delay: 0s; }
-.bubble:nth-child(2) { left: 20%; width: 50px; height: 50px; animation-delay: 0.5s; animation-duration: 7s; }
-.bubble:nth-child(3) { left: 30%; width: 35px; height: 35px; animation-delay: 1s; }
-.bubble:nth-child(4) { left: 40%; width: 45px; height: 45px; animation-delay: 1.5s; animation-duration: 8s; }
-.bubble:nth-child(5) { left: 50%; width: 25px; height: 25px; animation-delay: 2s; }
-.bubble:nth-child(6) { left: 60%; width: 40px; height: 40px; animation-delay: 2.5s; animation-duration: 6.5s; }
-.bubble:nth-child(7) { left: 70%; width: 35px; height: 35px; animation-delay: 3s; }
-.bubble:nth-child(8) { left: 80%; width: 30px; height: 30px; animation-delay: 3.5s; animation-duration: 7.5s; }
-.bubble:nth-child(9) { left: 15%; width: 45px; height: 45px; animation-delay: 1s; animation-duration: 8.5s; }
-.bubble:nth-child(10) { left: 35%; width: 28px; height: 28px; animation-delay: 0.3s; }
-.bubble:nth-child(11) { left: 55%; width: 38px; height: 38px; animation-delay: 2.2s; animation-duration: 6.8s; }
-.bubble:nth-child(12) { left: 75%; width: 32px; height: 32px; animation-delay: 1.8s; }
-.bubble:nth-child(13) { left: 25%; width: 42px; height: 42px; animation-delay: 0.8s; animation-duration: 7.2s; }
-.bubble:nth-child(14) { left: 65%; width: 36px; height: 36px; animation-delay: 2.8s; }
-.bubble:nth-child(15) { left: 85%; width: 29px; height: 29px; animation-delay: 1.3s; animation-duration: 6.3s; }
+.bubble:nth-child(1) {
+  left: 10%;
+  width: 30px;
+  height: 30px;
+  animation-delay: 0s;
+}
+
+.bubble:nth-child(2) {
+  left: 20%;
+  width: 50px;
+  height: 50px;
+  animation-delay: 0.5s;
+  animation-duration: 7s;
+}
+
+.bubble:nth-child(3) {
+  left: 30%;
+  width: 35px;
+  height: 35px;
+  animation-delay: 1s;
+}
+
+.bubble:nth-child(4) {
+  left: 40%;
+  width: 45px;
+  height: 45px;
+  animation-delay: 1.5s;
+  animation-duration: 8s;
+}
+
+.bubble:nth-child(5) {
+  left: 50%;
+  width: 25px;
+  height: 25px;
+  animation-delay: 2s;
+}
+
+.bubble:nth-child(6) {
+  left: 60%;
+  width: 40px;
+  height: 40px;
+  animation-delay: 2.5s;
+  animation-duration: 6.5s;
+}
+
+.bubble:nth-child(7) {
+  left: 70%;
+  width: 35px;
+  height: 35px;
+  animation-delay: 3s;
+}
+
+.bubble:nth-child(8) {
+  left: 80%;
+  width: 30px;
+  height: 30px;
+  animation-delay: 3.5s;
+  animation-duration: 7.5s;
+}
+
+.bubble:nth-child(9) {
+  left: 15%;
+  width: 45px;
+  height: 45px;
+  animation-delay: 1s;
+  animation-duration: 8.5s;
+}
+
+.bubble:nth-child(10) {
+  left: 35%;
+  width: 28px;
+  height: 28px;
+  animation-delay: 0.3s;
+}
+
+.bubble:nth-child(11) {
+  left: 55%;
+  width: 38px;
+  height: 38px;
+  animation-delay: 2.2s;
+  animation-duration: 6.8s;
+}
+
+.bubble:nth-child(12) {
+  left: 75%;
+  width: 32px;
+  height: 32px;
+  animation-delay: 1.8s;
+}
+
+.bubble:nth-child(13) {
+  left: 25%;
+  width: 42px;
+  height: 42px;
+  animation-delay: 0.8s;
+  animation-duration: 7.2s;
+}
+
+.bubble:nth-child(14) {
+  left: 65%;
+  width: 36px;
+  height: 36px;
+  animation-delay: 2.8s;
+}
+
+.bubble:nth-child(15) {
+  left: 85%;
+  width: 29px;
+  height: 29px;
+  animation-delay: 1.3s;
+  animation-duration: 6.3s;
+}
 
 @keyframes rise {
   0% {
     bottom: -100px;
     opacity: 0;
   }
+
   10% {
     opacity: 0.4;
   }
+
   90% {
     opacity: 0.4;
   }
+
   100% {
     bottom: 110%;
     opacity: 0;
@@ -1192,7 +1361,7 @@ const autoUnlock = async () => {
 
 .poem-line {
   font-size: 1.375rem;
-  line-height:1.3;
+  line-height: 1.3;
   margin: 1rem !important;
   text-align: center;
 }
@@ -1419,7 +1588,7 @@ const autoUnlock = async () => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
   padding: 0.75rem;
   display: flex;
   gap: 0.5rem;

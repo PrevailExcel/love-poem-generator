@@ -205,7 +205,7 @@ export function useUser() {
   const isAuthenticated = computed(() => !!authToken.value && !!currentUser.value)
   const isPremium = computed(() => currentUser.value?.is_premium || false)
   const canGenerate = computed(() => {
-    if (isPremium.value) return true
+    if (credits.value > 0) return true
     return remainingGenerations.value > 0
   })
 

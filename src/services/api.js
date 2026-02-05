@@ -64,6 +64,7 @@ export const api = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 120000, // 2 minutes for poem generation with image
     }),
     getStyles: () => apiClient.get('/poems/styles'),
     checkLimits: (anonymousId) => apiClient.post('/poems/check-limits', { anonymous_id: anonymousId }),
