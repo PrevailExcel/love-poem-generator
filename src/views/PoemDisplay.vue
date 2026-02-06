@@ -621,20 +621,20 @@ const autoUnlock = async () => {
   }
 }
 
-// watch(
-//   () => ({
-//     isAuthenticated: isAuthenticated.value,
-//     credits: credits.value,
-//   }),
-//   ({ isAuthenticated, credits }) => {
-//     if (isAuthenticated && credits === 0) {
-//       showPaywallModal.value = true
-//     } else {
-//       showPaywallModal.value = false
-//     }
-//   },
-//   { immediate: true }
-// )
+watch(
+  () => ({
+    isAuthenticated: isAuthenticated.value,
+    credits: credits.value,
+  }),
+  ({ isAuthenticated, credits }) => {
+    if (isAuthenticated && credits === 0) {
+      showPaywallModal.value = true
+    } else {
+      showPaywallModal.value = false
+    }
+  },
+  { immediate: true }
+)
 
 </script>
 

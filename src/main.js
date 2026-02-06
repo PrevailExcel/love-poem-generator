@@ -4,7 +4,8 @@ import App from './App.vue'
 import Landing from './views/Landing.vue'
 import Creator from './views/Creator.vue'
 import PoemDisplay from './views/PoemDisplay.vue'
-import PoemResult from './views/PoemResult.vue'
+import Privacy from './views/Privacy.vue'
+import Terms from './views/Terms.vue'
 import Dashboard from './views/Dashboard.vue'
 import { useUser } from './composables/useUser'
 import './style.css'
@@ -15,6 +16,8 @@ const router = createRouter({
     { path: '/', name: 'landing', component: Landing },
     { path: '/create', name: 'create', component: Creator },
     { path: '/poem', name: 'poem-result', component: PoemDisplay },
+    { path: '/privacy-policy', name: 'privacy', component:  Privacy},
+    { path: '/terms', name: 'terms', component:  Terms},
     { path: '/poem/:id', name: 'poem', component: PoemDisplay },
     { 
       path: '/dashboard', 

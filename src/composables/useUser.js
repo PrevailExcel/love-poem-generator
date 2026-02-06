@@ -6,7 +6,7 @@ const authToken = ref(null)
 const currentUser = ref(null)
 const generationCount = ref(0)
 const remainingGenerations = ref(2)
-const credits = ref(0) 
+const credits = ref(0)
 const poemDraft = ref({
   name: '',
   description: '',
@@ -77,9 +77,11 @@ export function useUser() {
       }
     } catch (error) {
       console.error('Failed to load user:', error)
-      // Clear invalid token
-      localStorage.removeItem('loveverse_auth_token')
-      authToken.value = null
+      if (authToken.value) {
+        console.warn('Invalid token, clearing auth')
+        localStorage.removeItem('loveverse_auth_token')
+        authToken.value = null
+      }
     }
   }
 

@@ -180,6 +180,9 @@ const handlePurchase = async () => {
   }
 }
 
+// onMounted(() => {
+//   loadCurrentUser()
+// });
 </script>
 
 <style scoped>

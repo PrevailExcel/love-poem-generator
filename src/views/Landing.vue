@@ -1,6 +1,12 @@
 <template>
   <div class="landing">
     <div class="hero">
+      <div class="romance-particles" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
       <h1 class="hero-title">For the words you can’t find</h1>
       <p class="hero-subtitle">
         Dear.luv helps you turn feelings into words that come straight from your heart.
@@ -46,7 +52,7 @@
     <section class="how-it-works">
       <h2 class="section-title">How It Works</h2>
       <p class="section-subtitle">Three simple steps to your perfect poem</p>
-      
+
       <div class="steps-container">
         <div class="step-item">
           <div class="step-number">1</div>
@@ -70,17 +76,32 @@
       <div class="examples-container">
         <h2 class="section-title">Poems That Touch Hearts</h2>
         <p class="section-subtitle">Real expressions, beautifully crafted</p>
-        
+
         <div class="examples-grid">
           <div class="example-card">
             <div class="example-style">Classic Romance</div>
             <div class="example-text">
-              "In morning light, your smile appears,<br>
-              A gentle warmth that calms my fears.<br>
-              Your laughter dances through the air,<br>
-              A melody beyond compare."
+              You’re the reason my food gets cold,<br>
+              because I’d rather watch you tell a story.<br>
+              You’re the reason I forget my own name,<br>
+              and just answer happily to “Hey, love.”<br>
+              <br>
+              You turn a Tuesday into a parade,<br>
+              just by walking through the door.<br>
+              You make the quiet feel like a celebration,<br>
+              and my crowded thoughts find a single, simple truth.<br>
+              <br>
+              If my world had a name on a map,<br>
+              it would just be yours.<br>
+              If my heart had a single, sound beat,<br>
+              it would just be your call.<br>
+              <br>
+              Odogwu m,<br>
+              you’re my all in all.<br>
+              And that’s not poetry.<br>
+              That’s just my morning, my noon, and my night.
             </div>
-            <div class="example-occasion">— For an anniversary</div>
+            <div class="example-occasion">— For Odogwu</div>
           </div>
           <div class="example-card">
             <div class="example-style">Playful & Light</div>
@@ -109,7 +130,7 @@
     <section class="perfect-for">
       <h2 class="section-title">Perfect For Every Moment</h2>
       <p class="section-subtitle">When you want to say something that matters</p>
-      
+
       <div class="occasions-grid">
         <div class="occasion-tag">
           <Cake :size="28" :stroke-width="2" />
@@ -154,6 +175,21 @@
       <button class="cta-button" @click="startCreating">Create Your First Poem</button>
       <p class="no-account">It takes less than a minute</p>
     </section>
+
+    <footer class="landing-footer">
+      <div class="footer-links">
+        <!-- Socials -->
+        <a href="https://instagram.com/dearluv" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://x.com/dearluv" target="_blank" rel="noopener">X</a>
+        <a href="https://tiktok.com/@dearluv" target="_blank" rel="noopener">TikTok</a>
+        <a href="https://youtube.com/@dearluv" target="_blank" rel="noopener">YouTube</a>
+
+        <!-- Legal Pages -->
+        <a href="/privacy-policy" target="_blank">Privacy Policy</a>
+        <a href="/terms" target="_blank">Terms & Conditions</a>
+      </div>
+      <p class="footer-copy">&copy; {{ new Date().getFullYear() }} Dear Luv. All rights reserved.</p>
+    </footer>
   </div>
 </template>
 
@@ -181,6 +217,8 @@ const startCreating = () => {
 .hero {
   text-align: center;
   margin-bottom: 4rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-title {
@@ -218,6 +256,102 @@ const startCreating = () => {
   font-size: 0.875rem;
   color: var(--color-rose-light);
   font-style: italic;
+}
+
+.romance-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.romance-particles span {
+  position: absolute;
+  bottom: -20px;
+  width: 6px;
+  height: 6px;
+  background: rgba(177, 126, 139, 0.85);
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: floatUp 14s linear infinite;
+  opacity: 0;
+}
+
+/* Stagger everything so it feels organic */
+.romance-particles span:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.romance-particles span:nth-child(2) {
+  left: 20%;
+  animation-delay: 4s;
+}
+
+.romance-particles span:nth-child(3) {
+  left: 30%;
+  animation-delay: 8s;
+}
+
+.romance-particles span:nth-child(4) {
+  left: 40%;
+  animation-delay: 2s;
+}
+
+.romance-particles span:nth-child(5) {
+  left: 50%;
+  animation-delay: 6s;
+}
+
+.romance-particles span:nth-child(6) {
+  left: 60%;
+  animation-delay: 10s;
+}
+
+.romance-particles span:nth-child(7) {
+  left: 70%;
+  animation-delay: 1s;
+}
+
+.romance-particles span:nth-child(8) {
+  left: 80%;
+  animation-delay: 5s;
+}
+
+.romance-particles span:nth-child(9) {
+  left: 90%;
+  animation-delay: 9s;
+}
+
+.romance-particles span:nth-child(10) {
+  left: 15%;
+  animation-delay: 7s;
+}
+
+.romance-particles span:nth-child(11) {
+  left: 55%;
+  animation-delay: 3s;
+}
+
+.romance-particles span:nth-child(12) {
+  left: 75%;
+  animation-delay: 11s;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(12px, -120vh);
+    opacity: 0;
+  }
 }
 
 .features {
@@ -365,6 +499,7 @@ const startCreating = () => {
   color: var(--color-ink);
   font-style: italic;
   margin-bottom: 1rem;
+  white-space: pre-wrap;
 }
 
 .example-occasion {
@@ -433,6 +568,40 @@ const startCreating = () => {
   line-height: 1.7;
 }
 
+.landing-footer {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-top: 1px solid rgba(139, 71, 93, 0.2);
+  margin-top: 6rem;
+  font-family: var(--font-serif);
+  color: var(--color-ink);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.footer-links a {
+  color: var(--color-rose-dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.footer-links a:hover {
+  color: var(--color-rose);
+  text-decoration: underline;
+}
+
+.footer-copy {
+  font-size: 0.875rem;
+  color: var(--color-rose-light);
+}
+
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.5rem;
@@ -458,6 +627,11 @@ const startCreating = () => {
 
   .occasions-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 1rem;
   }
 }
 </style>
