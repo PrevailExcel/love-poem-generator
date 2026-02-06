@@ -108,8 +108,8 @@ const handleGenerate = async () => {
       console.log("poem", result)
       
       // Update remaining generations
-      if (result.remaining !== undefined) {
-        remainingGenerations.value = result.remaining
+      if (result.remaining_generations !== undefined) {
+        remainingGenerations.value = result.remaining_generations
       }
       
       // Navigate to poem display (will show locked/unlocked state there)

@@ -20,19 +20,28 @@
         <template v-if="isAuthenticated">
 
           <div class="user-info">
-          <router-link to="/dashboard" class="dashboard-link user-link">
-            <Heart :size="18" />
-            <span>My Poems</span>
-          </router-link>
+            <router-link to="/dashboard" class="dashboard-link user-link">
+              <Heart :size="18" />
+              <span>My Poems</span>
+            </router-link>
           </div>
-          
+
           <div class="user-info">
-            <User :size="20" />
-            <span>{{ currentUser?.name }}</span>
+                        <router-link to="/dashboard" class="dashboard-link user-link">
+
+            <img v-if="currentUser?.avatar" :src="currentUser.avatar" class="user-avatar" />
+
+            <User v-else :size="20" />
+
+            <span class="user-name" :title="currentUser?.name">
+              {{ currentUser?.name }}
+            </span>
+
             <span v-if="isPremium" class="premium-badge">
               <Crown :size="14" />
               Premium
             </span>
+            </router-link>
           </div>
           <button @click="handleLogout" class="btn-secondary">
             <LogOut :size="18" />
@@ -59,22 +68,14 @@
     </main>
 
     <!-- Auth Modals -->
-    <LoginModal 
-      v-if="showLoginModal" 
-      @close="showLoginModal = false"
-      @switchToRegister="switchToRegister"
-    />
-    
-    <RegisterModal 
-      v-if="showRegisterModal" 
-      @close="showRegisterModal = false"
-      @switchToLogin="switchToLogin"
-    />
+    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" @switchToRegister="switchToRegister" />
+
+    <RegisterModal v-if="showRegisterModal" @close="showRegisterModal = false" @switchToLogin="switchToLogin" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted,provide } from 'vue'
+import { ref, onMounted, onUnmounted, provide } from 'vue'
 import { useUser } from '@/composables/useUser'
 import { User, Crown, LogOut, Sparkles, Heart } from 'lucide-vue-next'
 import LoginModal from '@/components/LoginModal.vue'
@@ -160,7 +161,7 @@ header {
   padding: 2rem;
   animation: fadeInDown 0.8s ease-out;
   position: relative;
-  z-index: 10;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -197,8 +198,17 @@ header {
 }
 
 @keyframes sparkle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.1); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
 }
 
 .user-info {
@@ -255,6 +265,21 @@ header {
 .btn-primary-small:hover {
   background: var(--color-rose-dark);
   transform: translateY(-1px);
+}
+
+.user-name {
+  max-width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 99px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .btn-secondary {
@@ -347,6 +372,9 @@ main {
   .user-info {
     font-size: 0.75rem;
   }
+  .user-name {
+  max-width: 50px;
 }
 
+}
 </style>

@@ -268,7 +268,9 @@ const route = useRoute()
 const router = useRouter()
 const { poemDraft, currentPoem, canGenerate, clearDraft, isAuthenticated, isPremium,
   credits,
+  remainingGenerations,
   isCurrentPoemUnlocked,
+  loadCurrentUser,
   unlockPoem,
   loadCredits
 } = useUser()
@@ -398,7 +400,7 @@ const togglePhotoBackground = () => {
 const hasCredits = computed(() => credits.value > 0)
 
 const canViewFullPoem = computed(() => {
-  return isAuthenticated.value && hasCredits.value
+  return isAuthenticated.value && remainingGenerations.value > 0
 })
 
 
@@ -595,6 +597,8 @@ onMounted(() => {
     router.push('/')
   }
 
+  loadCurrentUser()
+
   // Load additional fonts
   const link = document.createElement('link')
   link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Sacramento&family=Josefin+Sans:wght@300;400&family=Kalam:wght@300;400;700&display=swap'
@@ -602,7 +606,7 @@ onMounted(() => {
   document.head.appendChild(link)
 
   // If user just logged in and has credits, auto-unlock
-  if (isAuthenticated.value && credits.value > 0 && !isCurrentPoemUnlocked.value) {
+  if (isAuthenticated.value && remainingGenerations.value > 0) {
     autoUnlock()
   }
 })

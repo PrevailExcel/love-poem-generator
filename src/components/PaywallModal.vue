@@ -4,17 +4,13 @@
       <div class="modal-icon">
         <Sparkles :size="48" :stroke-width="2" />
       </div>
-      
+
       <h3 class="modal-title">You're out of poems.</h3>
       <p class="modal-text">Unlock this one, or get more for later.</p>
 
       <div class="pricing-options">
         <!-- Single Poem -->
-        <button 
-          @click="selectOption('single')" 
-          class="pricing-card" 
-          :class="{ selected: selectedOption === 'single' }"
-        >
+        <button @click="selectOption('single')" class="pricing-card" :class="{ selected: selectedOption === 'single' }">
           <div class="price-header">
             <span class="price">{{ singlePrice }}</span>
           </div>
@@ -22,11 +18,8 @@
         </button>
 
         <!-- 10 Poems Bundle -->
-        <button 
-          @click="selectOption('bundle10')" 
-          class="pricing-card recommended" 
-          :class="{ selected: selectedOption === 'bundle10' }"
-        >
+        <button @click="selectOption('bundle10')" class="pricing-card recommended"
+          :class="{ selected: selectedOption === 'bundle10' }">
           <div class="best-value-badge">Best value</div>
           <div class="price-header">
             <span class="price">{{ bundle10Price }}</span>
@@ -36,11 +29,7 @@
         </button>
       </div>
 
-      <button 
-        @click="handlePurchase" 
-        class="btn btn-primary btn-large"
-        :disabled="loading || !selectedOption"
-      >
+      <button @click="handlePurchase" class="btn btn-primary btn-large" :disabled="loading || !selectedOption">
         <Loader v-if="loading" :size="20" class="spinner" />
         <span v-else>{{ purchaseButtonText }}</span>
       </button>
@@ -53,8 +42,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
+import { useUser } from '@/composables/useUser'
 import BaseModal from './BaseModal.vue'
 import { Sparkles, Loader } from 'lucide-vue-next'
+
+const { currentUser, anonymousUserId, loadCurrentUser } = useUser()
 
 const props = defineProps({
   currency: {
@@ -84,14 +76,14 @@ const prices = computed(() => {
 })
 
 const singlePrice = computed(() => {
-  return props.currency === 'NGN' 
-    ? `₦${prices.value.single}` 
+  return props.currency === 'NGN'
+    ? `₦${prices.value.single}`
     : `$${prices.value.single}`
 })
 
 const bundle10Price = computed(() => {
-  return props.currency === 'NGN' 
-    ? `₦${prices.value.bundle10}` 
+  return props.currency === 'NGN'
+    ? `₦${prices.value.bundle10}`
     : `$${prices.value.bundle10}`
 })
 
@@ -104,12 +96,12 @@ const savingsPercentage = computed(() => {
 
 const purchaseButtonText = computed(() => {
   if (!selectedOption.value) return 'Select an option'
-  
+
   const optionMap = {
     single: 'Unlock This Poem',
     bundle10: 'Get 10 Poems'
   }
-  
+
   return optionMap[selectedOption.value]
 })
 
@@ -123,28 +115,71 @@ const handlePurchase = async () => {
   loading.value = true
 
   try {
-    // For MVP - would integrate with payment gateway
-    // For now, simulate success
-    setTimeout(() => {
-      emit('success', selectedOption.value)
-      emit('close')
-      loading.value = false
-    }, 1000)
 
-    // Real implementation:
-    // const response = await api.payments.createSession({
-    //   option: selectedOption.value,
-    //   currency: props.currency
-    // })
-    // if (response.data.success) {
-    //   window.location.href = response.data.payment_url
-    // }
+    const amount = prices.value[selectedOption.value]
+    if (!amount) throw new Error('Invalid amount')
+
+    const { data } = await api.payments.createCheckout({
+      amount: amount,
+      anonymous_id: currentUser.id || anonymousUserId.value,
+      option: selectedOption.value,
+      currency: props.currency
+    })
+
+    if (!data.success) throw new Error('Init failed')
+
+    if (!window.PaystackPop) {
+      throw new Error('Paystack not loaded')
+    }
+
+    const handler = window.PaystackPop.setup({
+      key: 'pk_test_ba37554cd01d1ad9b23140c09e11f9d1ff98b9ad', //import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      email: data.email || currentUser?.email || 'anonymous@loveverse.app',
+      amount: amount * 100,
+      currency: 'NGN',
+      ref: data.reference,
+
+      callback(response) {
+        (async () => {
+          try {
+
+        console.log('Payment callback', response)
+            const res = await api.payments.verifyPayment({
+              reference: response.reference,
+              anonymous_id: currentUser?.id || anonymousUserId.value,
+              option: selectedOption.value
+            })
+
+            if (res.data.success) {
+              loadCurrentUser()
+              emit('success', selectedOption.value)
+              emit('close')
+            } else {
+              alert('Payment verification failed. Please contact support.')
+            }
+          } catch (err) {
+            console.error('Verification error', err)
+            alert('Payment verification failed. Try again.')
+          } finally {
+            loading.value = false
+          }
+        })()
+
+      },
+
+      onClose() {
+        loading.value = false
+      }
+    })
+
+    handler.openIframe()
   } catch (error) {
-    console.error('Payment error:', error)
-    alert('Failed to process payment. Please try again.')
+    console.error(error)
+    alert('Payment failed')
     loading.value = false
   }
 }
+
 </script>
 
 <style scoped>
@@ -259,8 +294,13 @@ const handlePurchase = async () => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .small-text {

@@ -23,7 +23,7 @@
     <!-- Tabs -->
     <div class="tabs">
       <button 
-        @click="activeTab = 'poems'" 
+  @click="handleTabChange('poems')"
         class="tab" 
         :class="{ active: activeTab === 'poems' }"
       >
@@ -31,7 +31,7 @@
         My Poems ({{ totalPoems }})
       </button>
       <button 
-        @click="activeTab = 'payments'" 
+        @click="handleTabChange('payments')"
         class="tab" 
         :class="{ active: activeTab === 'payments' }"
       >
@@ -188,7 +188,7 @@ import PaywallModal from '@/components/PaywallModal.vue'
 import PoemViewModal from '@/components/PoemViewModal.vue'
 
 const router = useRouter()
-const { currentUser, remainingGenerations } = useUser()
+const { loadCurrentUser, remainingGenerations } = useUser()
 const { poemStyles } = usePoemGenerator()
 
 const activeTab = ref('poems')
@@ -204,7 +204,6 @@ const selectedPoem = ref(null)
 const totalPoems = computed(() => pagination.value?.total || poems.value.length)
 
 const poemsRemaining = computed(() => {
-  if (remainingGenerations.value === -1) return '∞'
   return remainingGenerations.value
 })
 
@@ -215,6 +214,7 @@ const userCurrency = computed(() => {
 
 onMounted(() => {
   loadPoems()
+  loadCurrentUser()
 })
 
 const loadPoems = async (page = 1) => {
@@ -262,6 +262,11 @@ const loadPage = (page) => {
 }
 
 const createNewPoem = () => {
+  // check if they have credit first.
+  if (remainingGenerations.value <= 0) {
+    showPaywallModal.value = true
+    return
+  }
   router.push('/create')
 }
 

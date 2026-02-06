@@ -85,7 +85,7 @@ export const api = {
   // Payments (Pay-per-poem)
   payments: {
     createCheckout: (data) => apiClient.post('/payments/checkout', data),
-    verifyPayment: (reference) => apiClient.get(`/payments/verify/${reference}`),
+    verifyPayment: (data) => apiClient.get('/payments/verify', { params: data }),
     getCredits: () => apiClient.get('/payments/credits'),
     history: () => apiClient.get('/payments/history'),
   },
