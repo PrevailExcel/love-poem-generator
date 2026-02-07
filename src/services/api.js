@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8001/api/v1';// 'https://dearluv.iquest.com.ng/api/v1'; 
-// import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+const API_BASE_URL = 'https://api.dearluv.ng/api/v1';// 'https://dearluv.iquest.com.ng/api/v1'; 
+// import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1'
 
 // Create axios instance
 const apiClient = axios.create({

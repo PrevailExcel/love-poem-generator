@@ -110,8 +110,8 @@ provide('openRegisterModal', () => {
   showRegisterModal.value = true
 })
 // http://localhost:8001
-// https://dearluv.iquest.com.ng
-const FRONTEND_API_ORIGIN = new URL("http://127.0.0.1:8001").origin
+// https://api.dearluv.ng
+const FRONTEND_API_ORIGIN = new URL("https://api.dearluv.ng").origin
 
 const handleAuthMessage = (event) => {
   if (event.origin !== FRONTEND_API_ORIGIN) return

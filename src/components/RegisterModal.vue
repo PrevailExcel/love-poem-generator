@@ -45,7 +45,7 @@ const switchToLogin = () => {
 
 const loginWithGoogle = () => {
   loading.value = true
-  const url = `http://localhost:8001/auth/google?anonymous_id=${anonymousUserId}`
+  const url = `https://api.dearluv.ng/auth/google?anonymous_id=${anonymousUserId}`
 
   const popup = window.open(
     url,
