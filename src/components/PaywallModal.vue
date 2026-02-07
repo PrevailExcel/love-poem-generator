@@ -134,7 +134,7 @@ const handlePurchase = async () => {
 
     const handler = window.PaystackPop.setup({
       key: 'pk_test_ba37554cd01d1ad9b23140c09e11f9d1ff98b9ad', //import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-      email: data.email || currentUser?.email || 'anonymous@loveverse.app',
+      email: data.email || currentUser?.email || 'anonymous@dearluv.app',
       amount: amount * 100,
       currency: 'NGN',
       ref: data.reference,

@@ -71,7 +71,7 @@ const canShare = computed(() => {
 
 const downloadImage = () => {
   const link = document.createElement('a')
-  link.download = 'loveverse-poem.png'
+  link.download = 'dearluv-poem.png'
   link.href = props.imageUrl
   link.click()
 }
@@ -81,13 +81,13 @@ const shareNative = async () => {
     // Convert data URL to blob
     const response = await fetch(props.imageUrl)
     const blob = await response.blob()
-    const file = new File([blob], 'loveverse-poem.png', { type: 'image/png' })
+    const file = new File([blob], 'dearluv-poem.png', { type: 'image/png' })
     
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
-        title: 'My LoveVerse Poem',
-        text: 'I created this beautiful poem with LoveVerse ❤️'
+        title: 'My dearluv Poem',
+        text: 'I created this beautiful poem with dearluv ❤️'
       })
     }
   } catch (error) {
@@ -96,18 +96,18 @@ const shareNative = async () => {
 }
 
 const shareTwitter = () => {
-  const text = 'I just created a beautiful love poem with LoveVerse! ❤️✨'
-  const url = 'https://loveverse.app'
+  const text = 'I just created a beautiful love poem with dearluv! ❤️✨'
+  const url = 'https://dearluv.app'
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
 }
 
 const shareWhatsApp = () => {
-  const text = 'I just created a beautiful love poem with LoveVerse! ❤️ Check it out!'
+  const text = 'I just created a beautiful love poem with dearluv! ❤️ Check it out!'
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
 }
 
 const shareFacebook = () => {
-  const url = 'https://loveverse.app'
+  const url = 'https://dearluv.app'
   window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
 }
 </script>

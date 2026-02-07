@@ -1512,14 +1512,14 @@
             },
             methods: {
                 initializeUser() {
-                    let userId = localStorage.getItem('loveverse_anonymous_id');
+                    let userId = localStorage.getItem('dearluv_anonymous_id');
                     if (!userId) {
                         userId = this.generateUUID();
-                        localStorage.setItem('loveverse_anonymous_id', userId);
+                        localStorage.setItem('dearluv_anonymous_id', userId);
                     }
                     this.anonymousUserId = userId;
 
-                    const count = localStorage.getItem('loveverse_generation_count');
+                    const count = localStorage.getItem('dearluv_generation_count');
                     this.generationCount = count ? parseInt(count) : 0;
 
                     this.loadDraft();
@@ -1595,7 +1595,7 @@
                     this.generatedPoem = this.createPoemText();
 
                     this.generationCount++;
-                    localStorage.setItem('loveverse_generation_count', this.generationCount);
+                    localStorage.setItem('dearluv_generation_count', this.generationCount);
 
                     this.currentView = 'poem';
                 },
@@ -1710,10 +1710,10 @@ Love blooms in my heart`
                         photoPreview: this.poemData.photoPreview,
                         style: this.poemData.style
                     };
-                    localStorage.setItem('loveverse_draft', JSON.stringify(draft));
+                    localStorage.setItem('dearluv_draft', JSON.stringify(draft));
                 },
                 loadDraft() {
-                    const draft = localStorage.getItem('loveverse_draft');
+                    const draft = localStorage.getItem('dearluv_draft');
                     if (draft) {
                         const data = JSON.parse(draft);
                         this.poemData.name = data.name || '';

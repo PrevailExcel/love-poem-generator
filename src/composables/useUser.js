@@ -22,22 +22,22 @@ export function useUser() {
   // Initialize user
   const initializeUser = () => {
     // Get or create anonymous ID
-    let storedId = localStorage.getItem('loveverse_anonymous_id')
+    let storedId = localStorage.getItem('dearluv_anonymous_id')
     if (!storedId) {
       storedId = generateUUID()
-      localStorage.setItem('loveverse_anonymous_id', storedId)
+      localStorage.setItem('dearluv_anonymous_id', storedId)
     }
     anonymousUserId.value = storedId
 
     // Get auth token
-    const token = localStorage.getItem('loveverse_auth_token')
+    const token = localStorage.getItem('dearluv_auth_token')
     if (token) {
       authToken.value = token
       loadCurrentUser()
     }
 
     // Load draft
-    const savedDraft = localStorage.getItem('loveverse_draft')
+    const savedDraft = localStorage.getItem('dearluv_draft')
     if (savedDraft) {
       try {
         const data = JSON.parse(savedDraft)
@@ -79,7 +79,7 @@ export function useUser() {
       console.error('Failed to load user:', error)
       if (authToken.value) {
         console.warn('Invalid token, clearing auth')
-        localStorage.removeItem('loveverse_auth_token')
+        localStorage.removeItem('dearluv_auth_token')
         authToken.value = null
       }
     }
@@ -118,7 +118,7 @@ export function useUser() {
       photoPreview: poemDraft.value.photoPreview,
       style: poemDraft.value.style
     }
-    localStorage.setItem('loveverse_draft', JSON.stringify(draft))
+    localStorage.setItem('dearluv_draft', JSON.stringify(draft))
   }
 
   // Clear draft
@@ -130,7 +130,7 @@ export function useUser() {
       photoPreview: null,
       style: 'classic'
     }
-    localStorage.removeItem('loveverse_draft')
+    localStorage.removeItem('dearluv_draft')
   }
 
   // Login
@@ -145,7 +145,7 @@ export function useUser() {
       if (response.data.success) {
         authToken.value = response.data.token
         currentUser.value = response.data.user
-        localStorage.setItem('loveverse_auth_token', response.data.token)
+        localStorage.setItem('dearluv_auth_token', response.data.token)
         remainingGenerations.value = response.data.user.remaining_generations
         return { success: true }
       }
@@ -171,7 +171,7 @@ export function useUser() {
       if (response.data.success) {
         authToken.value = response.data.token
         currentUser.value = response.data.user
-        localStorage.setItem('loveverse_auth_token', response.data.token)
+        localStorage.setItem('dearluv_auth_token', response.data.token)
         return { success: true }
       }
     } catch (error) {
@@ -184,7 +184,7 @@ export function useUser() {
 
   const loginWithToken = async (token) => {
     authToken.value = token
-    localStorage.setItem('loveverse_auth_token', token)
+    localStorage.setItem('dearluv_auth_token', token)
 
     await loadCurrentUser()
   }
@@ -198,7 +198,7 @@ export function useUser() {
     } finally {
       authToken.value = null
       currentUser.value = null
-      localStorage.removeItem('loveverse_auth_token')
+      localStorage.removeItem('dearluv_auth_token')
       await checkLimits() // Refresh limits for anonymous user
     }
   }

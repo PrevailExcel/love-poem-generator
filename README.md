@@ -40,7 +40,7 @@ npm run preview
 ## 📁 Project Structure
 
 ```
-loveverse/
+dearluv/
 ├── src/
 │   ├── components/          # Reusable components
 │   │   ├── BaseModal.vue
@@ -95,9 +95,9 @@ Uses Vue 3 Composition API with composables instead of Vuex/Pinia for simplicity
 ### Local Storage Schema
 ```javascript
 {
-  "loveverse_anonymous_id": "uuid-string",
-  "loveverse_generation_count": 0-2,
-  "loveverse_draft": {
+  "dearluv_anonymous_id": "uuid-string",
+  "dearluv_generation_count": 0-2,
+  "dearluv_draft": {
     name: "",
     description: "",
     photoPreview: "base64-string",

@@ -16,8 +16,8 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('loveverse_auth_token')
-    const anonymousId = localStorage.getItem('loveverse_anonymous_id')
+    const token = localStorage.getItem('dearluv_auth_token')
+    const anonymousId = localStorage.getItem('dearluv_anonymous_id')
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -40,7 +40,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Clear auth and redirect to login
-      localStorage.removeItem('loveverse_auth_token')
+      localStorage.removeItem('dearluv_auth_token')
       window.location.href = '/'
     }
     return Promise.reject(error)
