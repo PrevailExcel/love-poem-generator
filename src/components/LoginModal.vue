@@ -45,7 +45,7 @@ const switchToRegister = () => {
 
 const loginWithGoogle = () => {
   loading.value = true
-  const url = `http://127.0.0.1:8001/auth/google?anonymous_id=${anonymousUserId.value}`
+  const url = `https://api.dearluv.ng/auth/google?anonymous_id=${anonymousUserId.value}`
   console.log("anonymous user", anonymousUserId.value);
   
   const popup = window.open(
@@ -219,4 +219,13 @@ const loginWithGoogle = () => {
 .link-btn:hover {
   color: var(--color-rose-dark);
 }
+
+@media (max-width: 768px) {
+  .btn-google,
+  .btn-email {
+    padding: 0.9rem 1.2rem;
+    font-size: 0.95rem;
+  }
+}
+
 </style>

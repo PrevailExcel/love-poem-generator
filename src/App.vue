@@ -94,8 +94,8 @@
             </button>
           </div>
 
-          <!-- Mobile View -->
-          <div class="mobile-nav">
+          <!-- Mobile View -->          
+          <div class="mobile-nav" v-if="$route.name !== 'landing'">
             <button @click="showLoginModal = true" class="btn-text-mobile">
               Sign In
             </button>
@@ -169,7 +169,7 @@ provide('openRegisterModal', () => {
   showRegisterModal.value = true
 })
 
-const FRONTEND_API_ORIGIN = new URL("http://127.0.0.1:8001").origin
+const FRONTEND_API_ORIGIN = new URL("https://api.dearluv.ng").origin
 
 const handleAuthMessage = (event) => {
   if (event.origin !== FRONTEND_API_ORIGIN) return

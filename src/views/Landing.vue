@@ -106,10 +106,29 @@
           <div class="example-card">
             <div class="example-style">Playful & Light</div>
             <div class="example-text">
-              "You steal the covers, hog the bed,<br>
-              Leave coffee rings everywhere instead,<br>
-              But when you laugh, my world turns bright,<br>
-              And suddenly, everything's just right."
+              Omalicha, Omalicha,<br>
+You win every argument<br>
+By making me laugh halfway through my sentence.<br>
+You’ve got that look that says you know you’re right,<br>
+And I’m already agreeing.<br>
+<!-- <br>
+They talk about brightness,<br>
+But I’ve seen yours—<br>
+It’s not a borrowed light.<br>
+It’s the clever glint when you’re setting up a joke,<br>
+The warm, steady glow when the day is done.<br> -->
+<br>
+You turn a simple evening<br>
+Into a private comedy show,<br>
+Our own two-person club.<br>
+My cheeks hurt from smiling.<br>
+You make feeling good feel easy.<br>
+<br>
+So here’s to the banters,<br>
+The back-and-forth beat of our ordinary,<br>
+Perfect days.<br>
+My beautiful, slender, bright black queen,<br>
+My favorite conversation.
             </div>
             <div class="example-occasion">— For everyday love</div>
           </div>
