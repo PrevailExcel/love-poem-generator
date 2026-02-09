@@ -179,10 +179,10 @@
     <footer class="landing-footer">
       <div class="footer-links">
         <!-- Socials -->
-        <a href="https://instagram.com/dearluv" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://x.com/dearluv" target="_blank" rel="noopener">X</a>
-        <a href="https://tiktok.com/@dearluv" target="_blank" rel="noopener">TikTok</a>
-        <a href="https://youtube.com/@dearluv" target="_blank" rel="noopener">YouTube</a>
+        <a href="https://instagram.com/dearluvapp" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://x.com/dearluvapp" target="_blank" rel="noopener">X</a>
+        <a href="https://tiktok.com/@dearluvapp" target="_blank" rel="noopener">TikTok</a>
+        <a href="https://youtube.com/@dearluvapp" target="_blank" rel="noopener">YouTube</a>
 
         <!-- Legal Pages -->
         <a href="/privacy-policy" target="_blank">Privacy Policy</a>

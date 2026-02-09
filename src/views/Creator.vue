@@ -41,6 +41,7 @@ const {
   poemDraft, 
   currentPoem, 
   currentPoemId, 
+  isCurrentPoemUnlocked,
   anonymousUserId,
   remainingGenerations,
   checkLimits 
@@ -104,6 +105,7 @@ const handleGenerate = async () => {
       // Store the generated poem
       currentPoem.value = result.poem.content
       currentPoemId.value = result.poem.id
+      isCurrentPoemUnlocked.value = result.poem.is_unlocked
       
       console.log("poem", result)
       

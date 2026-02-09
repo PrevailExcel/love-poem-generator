@@ -244,12 +244,12 @@
 
     <!-- Paywall Modal -->
     <PaywallModal v-if="showPaywallModal" @close="showPaywallModal = false"
-      @purchaseComplete="handlePurchaseComplete" />
+      @success="handlePurchaseComplete" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUser } from '@/composables/useUser'
 import { poemStyles } from '@/composables/usePoemGenerator'
@@ -266,11 +266,12 @@ import html2canvas from 'html2canvas'
 
 const route = useRoute()
 const router = useRouter()
-const { poemDraft, currentPoem, canGenerate, clearDraft, isAuthenticated, isPremium,
+const { poemDraft, currentPoem, currentPoemId, canGenerate, clearDraft, isAuthenticated,
   credits,
   remainingGenerations,
   isCurrentPoemUnlocked,
   loadCurrentUser,
+  loginWithToken,
   unlockPoem,
   loadCredits
 } = useUser()
@@ -287,8 +288,6 @@ const copiedMessage = ref('Copied!')
 const generatedImageUrl = ref(null)
 const generatedImages = ref([])
 const poemCard = ref(null)
-const poemCardWrapper = ref(null)
-const sparklesContainer = ref(null)
 const previewBackground = ref(null)
 
 // Customization options
@@ -400,11 +399,14 @@ const togglePhotoBackground = () => {
 const hasCredits = computed(() => credits.value > 0)
 
 const canViewFullPoem = computed(() => {
-  return isAuthenticated.value && remainingGenerations.value > 0
+  console.log('unlocked: ' + isCurrentPoemUnlocked.value)
+  
+  return isAuthenticated.value && isCurrentPoemUnlocked.value
 })
 
 
 const handlePurchaseComplete = async () => {
+  alert('Thank you for your purchase! Unlocking your poem now...')
   showPaywallModal.value = false
   await loadCredits()
   await autoUnlock()
@@ -593,11 +595,14 @@ const createAnother = () => {
 }
 
 onMounted(() => {
+  showPaywallModal.value = false;
   if (!currentPoem.value && !isGenerating.value) {
     router.push('/')
-  }
+  }  
 
-  loadCurrentUser()
+  if (isAuthenticated.value) {
+    loadCurrentUser()
+  }
 
   // Load additional fonts
   const link = document.createElement('link')
@@ -609,8 +614,31 @@ onMounted(() => {
   if (isAuthenticated.value && remainingGenerations.value > 0) {
     autoUnlock()
   }
+
+  // window.addEventListener('message', handleAuthMessage)
+
 })
 
+// onUnmounted(() => {
+//   window.removeEventListener('message', handleAuthMessage)
+// })
+
+
+// https://api.dearluv.ng
+// https://api.dearluv.ng
+// const FRONTEND_API_ORIGIN = new URL("https://api.dearluv.ng").origin
+
+// const handleAuthMessage = (event) => {
+//   if (event.origin !== FRONTEND_API_ORIGIN) return
+//   console.log("Received auth message:", event.data)
+
+//   if (event.data?.token) {
+//     loginWithToken(event.data.token)
+//     //close modals if open
+//     showLoginModal.value = false
+//     showRegisterModal.value = false
+//   }
+// }
 
 const autoUnlock = async () => {
   if (currentPoemId.value) {
@@ -620,22 +648,6 @@ const autoUnlock = async () => {
     }
   }
 }
-
-watch(
-  () => ({
-    isAuthenticated: isAuthenticated.value,
-    credits: credits.value,
-  }),
-  ({ isAuthenticated, credits }) => {
-    if (isAuthenticated && credits === 0) {
-      showPaywallModal.value = true
-    } else {
-      showPaywallModal.value = false
-    }
-  },
-  { immediate: true }
-)
-
 </script>
 
 <style scoped>

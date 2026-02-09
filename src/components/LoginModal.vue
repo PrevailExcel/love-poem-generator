@@ -45,7 +45,7 @@ const switchToRegister = () => {
 
 const loginWithGoogle = () => {
   loading.value = true
-  const url = `https://api.dearluv.ng/auth/google?anonymous_id=${anonymousUserId}`
+  const url = `https://api.dearluv.ng/auth/google?anonymous_id=${anonymousUserId.value}`
 
   const popup = window.open(
     url,

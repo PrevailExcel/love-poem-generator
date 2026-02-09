@@ -106,10 +106,15 @@ provide('openLoginModal', () => {
   showLoginModal.value = true
 })
 
+provide('closeLoginModal', () => {
+  showLoginModal.value = false
+  showRegisterModal.value = false
+})
+
 provide('openRegisterModal', () => {
   showRegisterModal.value = true
 })
-// http://localhost:8001
+// https://api.dearluv.ng
 // https://api.dearluv.ng
 const FRONTEND_API_ORIGIN = new URL("https://api.dearluv.ng").origin
 

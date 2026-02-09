@@ -22,19 +22,11 @@
 
     <!-- Tabs -->
     <div class="tabs">
-      <button 
-  @click="handleTabChange('poems')"
-        class="tab" 
-        :class="{ active: activeTab === 'poems' }"
-      >
+      <button @click="handleTabChange('poems')" class="tab" :class="{ active: activeTab === 'poems' }">
         <Heart :size="18" />
         My Poems ({{ totalPoems }})
       </button>
-      <button 
-        @click="handleTabChange('payments')"
-        class="tab" 
-        :class="{ active: activeTab === 'payments' }"
-      >
+      <button @click="handleTabChange('payments')" class="tab" :class="{ active: activeTab === 'payments' }">
         <CreditCard :size="18" />
         Payment History
       </button>
@@ -57,12 +49,22 @@
       </div>
 
       <div v-else class="poems-grid">
-        <div 
-          v-for="poem in poems" 
-          :key="poem.id" 
-          class="poem-card"
-          @click="viewPoem(poem)"
-        >
+        <div v-for="poem in poems" :key="poem.id" class="poem-card" :class="{ locked: !poem.is_unlocked }"
+          @click="viewPoem(poem)">
+          <!-- Lock Overlay -->
+          <div v-if="!poem.is_unlocked" class="lock-overlay">
+            <Lock :size="32" class="lock-icon" />
+          </div>
+
+          <!-- Unlock Button (appears on hover) -->
+          <div v-if="!poem.is_unlocked" class="unlock-action">
+            <button @click.stop="unlockPoem(poem)" class="btn-unlock" :disabled="remainingGenerations <= 0">
+              <Unlock :size="16" />
+              <span v-if="remainingGenerations > 0">Unlock (1 poem)</span>
+              <span v-else>Get More Poems</span>
+            </button>
+          </div>
+
           <div class="poem-preview">
             <p class="poem-excerpt">{{ getExcerpt(poem.content) }}</p>
           </div>
@@ -74,7 +76,7 @@
               <span class="poem-style">{{ getStyleName(poem.style) }}</span>
             </div>
             <div class="poem-actions">
-              <button @click.stop="sharePoem(poem)" class="icon-btn" title="Share">
+              <button @click.stop="sharePoem(poem)" class="icon-btn" title="Share" :disabled="!poem.is_unlocked">
                 <Share2 :size="16" />
               </button>
               <button @click.stop="deletePoem(poem)" class="icon-btn" title="Delete">
@@ -90,21 +92,14 @@
 
       <!-- Pagination -->
       <div v-if="pagination && pagination.last_page > 1" class="pagination">
-        <button 
-          @click="loadPage(currentPage - 1)" 
-          :disabled="currentPage === 1"
-          class="btn btn-secondary"
-        >
+        <button @click="loadPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-secondary">
           Previous
         </button>
         <span class="page-info">
           Page {{ currentPage }} of {{ pagination.last_page }}
         </span>
-        <button 
-          @click="loadPage(currentPage + 1)" 
-          :disabled="currentPage === pagination.last_page"
-          class="btn btn-secondary"
-        >
+        <button @click="loadPage(currentPage + 1)" :disabled="currentPage === pagination.last_page"
+          class="btn btn-secondary">
           Next
         </button>
       </div>
@@ -152,19 +147,11 @@
     </div>
 
     <!-- Paywall Modal -->
-    <PaywallModal
-      v-if="showPaywallModal"
-      :currency="userCurrency"
-      @close="showPaywallModal = false"
-      @success="handlePaymentSuccess"
-    />
+    <PaywallModal v-if="showPaywallModal" :currency="userCurrency" @close="showPaywallModal = false"
+      @success="handlePaymentSuccess" />
 
     <!-- Poem View Modal -->
-    <PoemViewModal
-      v-if="selectedPoem"
-      :poem="selectedPoem"
-      @close="selectedPoem = null"
-    />
+    <PoemViewModal v-if="selectedPoem" :poem="selectedPoem" @close="selectedPoem = null" />
   </div>
 </template>
 
@@ -174,15 +161,17 @@ import { useRouter } from 'vue-router'
 import { useUser } from '@/composables/useUser'
 import { usePoemGenerator } from '@/composables/usePoemGenerator'
 import { api } from '@/services/api'
-import { 
-  Heart, 
-  Sparkles, 
-  PenTool, 
-  Plus, 
-  CreditCard, 
-  Share2, 
+import {
+  Heart,
+  Sparkles,
+  PenTool,
+  Plus,
+  CreditCard,
+  Share2,
+  Lock,
+  Unlock,
   Trash2,
-  Loader 
+  Loader
 } from 'lucide-vue-next'
 import PaywallModal from '@/components/PaywallModal.vue'
 import PoemViewModal from '@/components/PoemViewModal.vue'
@@ -235,7 +224,7 @@ const loadPoems = async (page = 1) => {
 
 const loadPayments = async () => {
   if (payments.value.length > 0) return // Already loaded
-  
+
   loadingPayments.value = true
   try {
     const response = await api.payments.history()
@@ -270,8 +259,40 @@ const createNewPoem = () => {
   router.push('/create')
 }
 
+const unlockPoem = async (poem) => {
+  if (remainingGenerations.value <= 0) {
+    showPaywallModal.value = true
+    return
+  }
+
+  try {
+    const response = await api.poems.unlock(poem.id)
+    if (response.data.success) {
+      // Update the poem in the local array
+      const index = poems.value.findIndex(p => p.id === poem.id)
+      if (index !== -1) {
+        poems.value[index].is_unlocked = true
+        // poems.value[index].content = response.data.poem.content
+      }
+      // Reload user data to update credits
+      await loadCurrentUser()
+      // Open the poem
+      selectedPoem.value = poems.value[index]
+    }
+  } catch (error) {
+    console.error('Failed to unlock poem:', error)
+    alert('Failed to unlock poem. Please try again.')
+  }
+}
+
 const viewPoem = (poem) => {
-  selectedPoem.value = poem
+  if (poem.is_unlocked) {
+    selectedPoem.value = poem
+  } else if (remainingGenerations.value > 0) {
+    unlockPoem(poem)
+  } else {
+    showPaywallModal.value = true
+  }
 }
 
 const sharePoem = async (poem) => {
@@ -332,9 +353,9 @@ const formatDate = (dateString) => {
   if (diffDays === 0) return 'Today'
   if (diffDays === 1) return 'Yesterday'
   if (diffDays < 7) return `${diffDays} days ago`
-  
-  return date.toLocaleDateString('en-US', { 
-    month: 'short', 
+
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
     day: 'numeric',
     year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
   })
@@ -449,8 +470,13 @@ const handlePaymentSuccess = async (option) => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-state svg {
@@ -596,6 +622,88 @@ const handlePaymentSuccess = async (option) => {
 .payments-table td {
   padding: 1rem;
   text-align: left;
+}
+
+
+/* Locked Poem Styles */
+.poem-card.locked {
+  position: relative;
+  opacity: 0.7;
+}
+
+.poem-card.locked .poem-excerpt {
+  filter: blur(8px);
+  user-select: none;
+}
+
+.lock-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.lock-icon {
+  color: var(--color-rose);
+  opacity: 0.8;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Unlock Button */
+.unlock-action {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 3;
+  border-radius: 16px;
+}
+
+.poem-card.locked:hover .unlock-action {
+  opacity: 1;
+}
+
+.btn-unlock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--color-rose), var(--color-rose-dark));
+  color: white;
+  border: none;
+  padding: 0.875rem 1.75rem;
+  border-radius: 25px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(139, 71, 93, 0.3);
+}
+
+.btn-unlock:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 71, 93, 0.4);
+}
+
+.btn-unlock:disabled {
+  background: linear-gradient(135deg, #999, #666);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .payments-table th {
