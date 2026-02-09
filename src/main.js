@@ -19,6 +19,7 @@ const router = createRouter({
     { path: '/privacy-policy', name: 'privacy', component:  Privacy},
     { path: '/terms', name: 'terms', component:  Terms},
     { path: '/poem/:id', name: 'poem', component: PoemDisplay },
+    { path: '/poem/:id/share', name: 'poem-share', component: PoemDisplay },
     { 
       path: '/dashboard', 
       name: 'dashboard', 

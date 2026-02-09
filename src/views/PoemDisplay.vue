@@ -1,14 +1,20 @@
 <template>
   <div class="poem-display-wrapper">
-    <!-- Sparkle Effects -->
-    <div class="sparkles-container" ref="sparklesContainer"></div>
 
-    <!-- Generating State -->
-    <div v-if="isGenerating" class="generating">
+    <!-- Loading State for Database Poem -->
+    <div v-if="loadingPoem" class="generating">
       <div class="heart-loading">
         <Heart :size="64" :stroke-width="2" :fill="'var(--color-rose)'" />
       </div>
-      <p class="generating-text">Crafting your poem with love...</p>
+      <p class="generating-text">Loading your poem...</p>
+    </div>
+
+        <!-- Generating State -->
+    <div v-else-if="isGenerating" class="generating">
+      <div class="heart-loading">
+        <Heart :size="64" :stroke-width="2" :fill="'var(--color-rose)'" />
+      </div>
+      <p class="generating-text">Wrting your poem with love...</p>
     </div>
 
     <!-- Poem Display -->
@@ -181,8 +187,18 @@
         </div>
       </div>
 
+      <!-- Public Share CTA - Only show for public shares -->
+      <div v-if="isPublicShare" class="public-cta-section">
+        <h3 class="cta-title">Your turn.</h3>
+        <p class="cta-subtitle">Create your own in less than a minute.</p>
+        
+        <button @click="handleCreateYourOwn" class="btn-cta-primary">
+          Create Your Poem
+        </button>
+      </div>
+
       <!-- Action Buttons -->
-      <div class="action-buttons">
+      <div class="action-buttons" v-if="!isPublicShare">
         <button class="action-btn tooltip-trigger" @click="copyPoem">
           <Copy :size="20" :stroke-width="2" />
           Copy Text
@@ -200,7 +216,7 @@
           <span class="tooltip">Share poem link</span>
         </button>
 
-        <button v-if="!isAuthenticated" class="action-btn tooltip-trigger" @click="showLoginModal = true">
+        <button v-if="!isAuthenticated" class="action-btn tooltip-trigger" @click="openRegisterModal()">
           <Save :size="20" :stroke-width="2" />
           Save Forever
           <span class="tooltip">Create account to save</span>
@@ -237,11 +253,6 @@
     <CopiedModal v-if="showCopiedModal" @close="showCopiedModal = false" :message="copiedMessage" />
     <LimitModal v-if="showLimitModal" @close="showLimitModal = false" />
 
-    <!-- Auth Modals -->
-    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" @switchToRegister="switchToRegister" />
-
-    <RegisterModal v-if="showRegisterModal" @close="showRegisterModal = false" @switchToLogin="switchToLogin" />
-
     <!-- Paywall Modal -->
     <PaywallModal v-if="showPaywallModal" @close="showPaywallModal = false"
       @success="handlePurchaseComplete" />
@@ -249,29 +260,33 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, inject, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUser } from '@/composables/useUser'
+import {api} from '@/services/api'
 import { poemStyles } from '@/composables/usePoemGenerator'
-import { Heart, Copy, Share2, Save, Sparkles, Check, Palette, Type, Link, Download, Crown, Lock, Mail, Image as ImageIcon } from 'lucide-vue-next'
+import { Heart, Copy, Share2, Save, Sparkles, Check, Palette, Type, Link, Download, Crown, Lock, PenTool, Image as ImageIcon } from 'lucide-vue-next'
 
 import SaveModal from '@/components/SaveModal.vue'
 import ShareImageModal from '@/components/ShareImageModal.vue'
 import CopiedModal from '@/components/CopiedModal.vue'
 import LimitModal from '@/components/LimitModal.vue'
-import LoginModal from '@/components/LoginModal.vue'
 import PaywallModal from '@/components/PaywallModal.vue'
-import RegisterModal from '@/components/RegisterModal.vue'
 import html2canvas from 'html2canvas'
 
 const route = useRoute()
 const router = useRouter()
-const { poemDraft, currentPoem, currentPoemId, canGenerate, clearDraft, isAuthenticated,
+const { 
+  poemDraft, 
+  currentPoem, 
+  currentPoemId, 
+  canGenerate, 
+  clearDraft, 
+  isAuthenticated,
   credits,
   remainingGenerations,
   isCurrentPoemUnlocked,
   loadCurrentUser,
-  loginWithToken,
   unlockPoem,
   loadCredits
 } = useUser()
@@ -282,13 +297,16 @@ const showSaveModal = ref(false)
 const showShareImageModal = ref(false)
 const showCopiedModal = ref(false)
 const showLimitModal = ref(false)
-const showLoginModal = ref(false)
-const showRegisterModal = ref(false)
 const copiedMessage = ref('Copied!')
 const generatedImageUrl = ref(null)
 const generatedImages = ref([])
 const poemCard = ref(null)
 const previewBackground = ref(null)
+const loadingPoem = ref(false)
+const poemFromDatabase = ref(null)
+
+// Inject the modal controls
+const openRegisterModal = inject('openRegisterModal')
 
 // Customization options
 const selectedBackground = ref('gradient-rose')
@@ -348,6 +366,62 @@ const fonts = [
   { id: 'handwritten', name: 'Handwritten', family: "'Kalam', cursive" }
 ]
 
+// Check if we're viewing a public share link
+const isPublicShare = computed(() => {
+  return route.name === 'poem-share'
+})
+
+// Check if we're viewing a specific poem by ID
+const isViewingPoemById = computed(() => {
+  return route.params.id && route.params.id !== 'generating'
+})
+
+// Load poem from database if viewing by ID
+const loadPoemById = async (poemId) => {
+  loadingPoem.value = true
+  try {
+    // Choose the correct API endpoint based on route
+    const response = isPublicShare.value 
+      ? await api.poems.showPublic(poemId)
+      : await api.poems.get(poemId)
+    
+    if (response.data.success) {
+      poemFromDatabase.value = response.data.poem
+      
+      // Set the current poem content
+      currentPoem.value = response.data.poem.content
+      currentPoemId.value = response.data.poem.id
+      isCurrentPoemUnlocked.value = response.data.poem.is_unlocked
+      
+      // Update poem draft with metadata
+      poemDraft.value = {
+        ...poemDraft.value,
+        name: response.data.poem.recipient_name,
+        style: response.data.poem.style,
+      }
+    } else {
+      // Poem not found
+      alert(response.data.message || 'Poem not found')
+      router.push('/')
+    }
+  } catch (error) {
+    console.error('Failed to load poem:', error)
+    
+    if (error.response?.status === 404) {
+      alert('This poem does not exist or has been deleted.')
+    } else if (error.response?.status === 403) {
+      alert('You do not have permission to view this poem.')
+    } else {
+      alert('Failed to load poem. Please try again.')
+    }
+    
+    router.push(isPublicShare.value ? '/' : '/dashboard')
+  } finally {
+    loadingPoem.value = false
+  }
+}
+
+
 const selectedStyleName = computed(() => {
   const style = poemStyles.find(s => s.id === poemDraft.value.style)
   return style ? style.name : ''
@@ -369,19 +443,9 @@ const lockedLines = computed(() => {
 })
 
 const handleContinueWithEmail = () => {
-  // Show registration modal by default for new users
-  showRegisterModal.value = true
+  openRegisterModal()
 }
 
-const switchToRegister = () => {
-  showLoginModal.value = false
-  showRegisterModal.value = true
-}
-
-const switchToLogin = () => {
-  showRegisterModal.value = false
-  showLoginModal.value = true
-}
 
 const changeBackground = (bgId) => {
   if (usePhotoBackground.value) return
@@ -396,11 +460,28 @@ const togglePhotoBackground = () => {
   usePhotoBackground.value = !usePhotoBackground.value
 }
 
-const hasCredits = computed(() => credits.value > 0)
+// Handler for CTA buttons on public shares
+const handleCreateYourOwn = () => {
+  if (isAuthenticated.value) {
+    // Already logged in, go straight to create
+    router.push('/create')
+  } else {
+    // Not logged in, show register modal then redirect to create
+    openRegisterModal()
+    // You might want to store an intent to redirect after login
+    localStorage.setItem('redirect_after_login', '/create')
+  }
+}
 
+// Update the canViewFullPoem computed to consider public shares
 const canViewFullPoem = computed(() => {
-  console.log('unlocked: ' + isCurrentPoemUnlocked.value)
   
+  // For public shares, poem is always viewable if unlocked
+  if (isPublicShare.value) {
+    return isCurrentPoemUnlocked.value
+  }
+  
+  // For regular views, need authentication AND unlock
   return isAuthenticated.value && isCurrentPoemUnlocked.value
 })
 
@@ -414,7 +495,7 @@ const handlePurchaseComplete = async () => {
 
 const copyPoem = async () => {
   if (!isAuthenticated.value) {
-    showLoginModal.value = true
+    openRegisterModal()
     return
   } else if (!canViewFullPoem.value) {
     showPaywallModal.value = true
@@ -434,8 +515,22 @@ const copyPoem = async () => {
 }
 
 const copyLink = async () => {
-    if (!isAuthenticated.value) {
-    showLoginModal.value = true
+  // For public shares, allow copying without login
+  if (isPublicShare.value) {
+    try {
+      await navigator.clipboard.writeText(currentPoem.value)
+      copiedMessage.value = 'Poem copied!'
+      showCopiedModal.value = true
+      setTimeout(() => {
+        showCopiedModal.value = false
+      }, 2000)
+    } catch (error) {
+      console.error('Failed to copy:', error)
+    }
+    return
+  }
+    else if (!isAuthenticated.value) {
+    openRegisterModal()
     return
   } else if (!canViewFullPoem.value) {
     showPaywallModal.value = true
@@ -444,8 +539,8 @@ const copyLink = async () => {
 
   try {
     const url = window.location.href
-    await navigator.clipboard.writeText(url)
-    copiedMessage.value = 'Link copied!'
+    await navigator.clipboard.writeText(url + '/share')
+    copiedMessage.value = 'Share Link copied!'
     showCopiedModal.value = true
     setTimeout(() => {
       showCopiedModal.value = false
@@ -457,7 +552,7 @@ const copyLink = async () => {
 
 const generateImage = async () => {
     if (!isAuthenticated.value) {
-    showLoginModal.value = true
+    openRegisterModal()
     return
   } else if (!canViewFullPoem.value) {
     showPaywallModal.value = true
@@ -485,7 +580,7 @@ const generateImage = async () => {
 
 const shareAsImage = async () => {
     if (!isAuthenticated.value) {
-    showLoginModal.value = true
+    openRegisterModal()
     return
   } else if (!canViewFullPoem.value) {
     showPaywallModal.value = true
@@ -532,7 +627,7 @@ const shareAsImage = async () => {
 
 const downloadImage = (canvas) => {
     if (!isAuthenticated.value) {
-    showLoginModal.value = true
+    openRegisterModal()
     return
   } else if (!canViewFullPoem.value) {
     showPaywallModal.value = true
@@ -547,7 +642,7 @@ const downloadImage = (canvas) => {
 
 const downloadSingleImage = (url, index) => {
     if (!isAuthenticated.value) {
-    showLoginModal.value = true
+    openRegisterModal()
     return
   } else if (!canViewFullPoem.value) {
     showPaywallModal.value = true
@@ -562,7 +657,7 @@ const downloadSingleImage = (url, index) => {
 
 const shareSingleImage = async (url) => {
     if (!isAuthenticated.value) {
-    showLoginModal.value = true
+    openRegisterModal()
     return
   } else if (!canViewFullPoem.value) {
     showPaywallModal.value = true
@@ -594,11 +689,24 @@ const createAnother = () => {
   router.push('/create')
 }
 
+
+// Watch route params AND route name for changes
+watch(() => [route.params.id, route.name], ([newId, newName]) => {
+  if (newId && newId !== 'generating') {
+    loadPoemById(newId)
+  }
+}, { immediate: true })
+
 onMounted(() => {
   showPaywallModal.value = false;
-  if (!currentPoem.value && !isGenerating.value) {
+
+  // If viewing a specific poem, load it
+  if (isViewingPoemById.value) {
+    loadPoemById(route.params.id)
+  } else if (!currentPoem.value && !isGenerating.value) {
+    // No poem to display, redirect
     router.push('/')
-  }  
+  }
 
   if (isAuthenticated.value) {
     loadCurrentUser()
@@ -615,36 +723,18 @@ onMounted(() => {
     autoUnlock()
   }
 
-  // window.addEventListener('message', handleAuthMessage)
-
 })
-
-// onUnmounted(() => {
-//   window.removeEventListener('message', handleAuthMessage)
-// })
-
-
-// https://api.dearluv.ng
-// https://api.dearluv.ng
-// const FRONTEND_API_ORIGIN = new URL("https://api.dearluv.ng").origin
-
-// const handleAuthMessage = (event) => {
-//   if (event.origin !== FRONTEND_API_ORIGIN) return
-//   console.log("Received auth message:", event.data)
-
-//   if (event.data?.token) {
-//     loginWithToken(event.data.token)
-//     //close modals if open
-//     showLoginModal.value = false
-//     showRegisterModal.value = false
-//   }
-// }
 
 const autoUnlock = async () => {
   if (currentPoemId.value) {
     const result = await unlockPoem(currentPoemId.value)
     if (result.success) {
       isCurrentPoemUnlocked.value = true
+
+      // Reload the poem to get full content
+      if (isViewingPoemById.value) {
+        await loadPoemById(route.params.id)
+      }
     }
   }
 }
@@ -689,17 +779,6 @@ const autoUnlock = async () => {
   justify-content: center;
   box-shadow: 0 4px 20px rgba(139, 71, 93, 0.2);
   color: var(--color-rose);
-}
-
-/* Sparkles Animation */
-.sparkles-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
 }
 
 .sparkle {
@@ -1599,6 +1678,58 @@ const autoUnlock = async () => {
   display: block;
 }
 
+/* Public CTA Section */
+.public-cta-section {
+  margin-top: 3rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  border: 1px solid rgba(139, 71, 93, 0.1);
+}
+
+.cta-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--color-rose-dark);
+  margin-bottom: 0.75rem;
+  font-weight: 400;
+}
+
+.cta-subtitle {
+  font-size: 1rem;
+  color: var(--color-ink);
+  opacity: 0.7;
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
+
+.btn-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: white;
+  background: linear-gradient(135deg, var(--color-rose), var(--color-rose-dark));
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(139, 71, 93, 0.2);
+}
+
+.btn-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 71, 93, 0.3);
+}
+
+.btn-cta-primary:active {
+  transform: translateY(0);
+}
+
 .gallery-actions {
   position: absolute;
   bottom: 0;
@@ -1687,6 +1818,21 @@ const autoUnlock = async () => {
 
   .footer-right {
     align-items: center;
+  }
+
+
+  .public-cta-section {
+    padding: 2rem 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .cta-title {
+    font-size: 1.75rem;
+  }
+
+  .btn-cta-primary {
+    width: 100%;
+    padding: 0.875rem 2rem;
   }
 }
 </style>

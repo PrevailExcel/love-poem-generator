@@ -18,46 +18,97 @@
 
       <div class="header-actions">
         <template v-if="isAuthenticated">
-
-          <div class="user-info">
-            <router-link to="/dashboard" class="dashboard-link user-link">
+          <!-- Desktop View -->
+          <div class="desktop-nav">
+            <router-link to="/dashboard" class="user-link">
               <Heart :size="18" />
               <span>My Poems</span>
             </router-link>
-          </div>
 
-          <div class="user-info">
-                        <router-link to="/dashboard" class="dashboard-link user-link">
-
-            <img v-if="currentUser?.avatar" :src="currentUser.avatar" class="user-avatar" />
-
-            <User v-else :size="20" />
-
-            <span class="user-name" :title="currentUser?.name">
-              {{ currentUser?.name }}
-            </span>
-
-            <span v-if="isPremium" class="premium-badge">
-              <Crown :size="14" />
-              Premium
-            </span>
+            <router-link to="/dashboard" class="user-link">
+              <img v-if="currentUser?.avatar" :src="currentUser.avatar" class="user-avatar" />
+              <User v-else :size="20" />
+              <span class="user-name" :title="currentUser?.name">
+                {{ currentUser?.name }}
+              </span>
+              <span v-if="isPremium" class="premium-badge">
+                <Crown :size="14" />
+                Premium
+              </span>
             </router-link>
+
+            <button @click="handleLogout" class="btn-secondary">
+              <LogOut :size="18" />
+              Logout
+            </button>
           </div>
-          <button @click="handleLogout" class="btn-secondary">
-            <LogOut :size="18" />
-            Logout
-          </button>
+
+          <!-- Mobile View -->
+          <div class="mobile-nav">
+            <router-link to="/dashboard" class="icon-link" title="My Poems">
+              <Heart :size="20" />
+            </router-link>
+            
+            <button @click="showMobileMenu = !showMobileMenu" class="icon-link" :class="{ active: showMobileMenu }">
+              <img v-if="currentUser?.avatar" :src="currentUser.avatar" class="user-avatar-mobile" />
+              <User v-else :size="20" />
+            </button>
+
+            <!-- Mobile Dropdown Menu -->
+            <div v-if="showMobileMenu" class="mobile-menu" @click.stop>
+              <div class="mobile-menu-header">
+                <img v-if="currentUser?.avatar" :src="currentUser.avatar" class="user-avatar-large" />
+                <User v-else :size="32" />
+                <div class="mobile-user-info">
+                  <div class="mobile-user-name">{{ currentUser?.name }}</div>
+                  <div v-if="isPremium" class="premium-badge-mobile">
+                    <Crown :size="12" />
+                    Premium
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mobile-menu-divider"></div>
+              
+              <router-link to="/dashboard" class="mobile-menu-item" @click="showMobileMenu = false">
+                <Heart :size="18" />
+                My Poems
+              </router-link>
+              
+              <button @click="handleLogout" class="mobile-menu-item">
+                <LogOut :size="18" />
+                Logout
+              </button>
+            </div>
+          </div>
         </template>
+
         <template v-else>
-          <button @click="showLoginModal = true" class="btn-text">
-            Sign In
-          </button>
-          <button @click="showRegisterModal = true" class="btn-primary-small">
-            Get Started
-          </button>
+          <!-- Desktop View -->
+          <div class="desktop-nav">
+            <button @click="showLoginModal = true" class="btn-text">
+              Sign In
+            </button>
+            <button @click="showRegisterModal = true" class="btn-primary-small">
+              Get Started
+            </button>
+          </div>
+
+          <!-- Mobile View -->
+          <div class="mobile-nav">
+            <button @click="showLoginModal = true" class="btn-text-mobile">
+              Sign In
+            </button>
+            <button @click="showRegisterModal = true" class="btn-primary-small">
+              Get Started
+            </button>
+          </div>
         </template>
       </div>
     </header>
+
+    <!-- Overlay for mobile menu -->
+    <div v-if="showMobileMenu" class="menu-overlay" @click="showMobileMenu = false"></div>
 
     <main>
       <router-view v-slot="{ Component }">
@@ -69,22 +120,24 @@
 
     <!-- Auth Modals -->
     <LoginModal v-if="showLoginModal" @close="showLoginModal = false" @switchToRegister="switchToRegister" />
-
     <RegisterModal v-if="showRegisterModal" @close="showRegisterModal = false" @switchToLogin="switchToLogin" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, provide } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUser } from '@/composables/useUser'
 import { User, Crown, LogOut, Sparkles, Heart } from 'lucide-vue-next'
 import LoginModal from '@/components/LoginModal.vue'
 import RegisterModal from '@/components/RegisterModal.vue'
 
-const { isAuthenticated, isPremium, currentUser, credits, loginWithToken, logout } = useUser()
+const router = useRouter()
+const { isAuthenticated, isPremium, currentUser, unlockPoem, currentPoemId, loginWithToken, logout } = useUser()
 
 const showLoginModal = ref(false)
 const showRegisterModal = ref(false)
+const showMobileMenu = ref(false)
 
 const switchToRegister = () => {
   showLoginModal.value = false
@@ -97,6 +150,7 @@ const switchToLogin = () => {
 }
 
 const handleLogout = async () => {
+  showMobileMenu.value = false
   await logout()
   window.location.href = '/'
 }
@@ -114,9 +168,8 @@ provide('closeLoginModal', () => {
 provide('openRegisterModal', () => {
   showRegisterModal.value = true
 })
-// https://api.dearluv.ng
-// https://api.dearluv.ng
-const FRONTEND_API_ORIGIN = new URL("https://api.dearluv.ng").origin
+
+const FRONTEND_API_ORIGIN = new URL("http://127.0.0.1:8001").origin
 
 const handleAuthMessage = (event) => {
   if (event.origin !== FRONTEND_API_ORIGIN) return
@@ -124,12 +177,24 @@ const handleAuthMessage = (event) => {
 
   if (event.data?.token) {
     loginWithToken(event.data.token)
-    //close modals if open
     showLoginModal.value = false
     showRegisterModal.value = false
+
+    const redirectPath = localStorage.getItem('redirect_after_login')
+    if (redirectPath) {
+      localStorage.removeItem('redirect_after_login')
+      router.push(redirectPath)
+      return
+    }
+
+    unlockPoem(currentPoemId.value).then(result => {
+      console.log('result from app.vue', result)
+      if (result.success) {
+        isCurrentPoemUnlocked.value = true
+      }
+    })
   }
 }
-
 
 onMounted(() => {
   window.addEventListener('message', handleAuthMessage)
@@ -167,7 +232,7 @@ header {
   padding: 2rem;
   animation: fadeInDown 0.8s ease-out;
   position: relative;
-  z-index: 1;
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -183,41 +248,23 @@ header {
 .header-actions {
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 1001;
+}
+
+/* Desktop Navigation - visible by default */
+.desktop-nav {
+  display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
-.credits-display {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-gold);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+/* Mobile Navigation - hidden by default */
+.mobile-nav {
+  display: none;
 }
 
-.credits-display svg {
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-@keyframes sparkle {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.7;
-    transform: scale(1.1);
-  }
-}
-
-.user-info {
+.user-link {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -226,6 +273,13 @@ header {
   border-radius: 20px;
   font-size: 0.875rem;
   color: var(--color-rose-dark);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.user-link:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
 }
 
 .premium-badge {
@@ -274,7 +328,7 @@ header {
 }
 
 .user-name {
-  max-width: 90px;
+  max-width: 100px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,7 +337,7 @@ header {
 .user-avatar {
   width: 20px;
   height: 20px;
-  border-radius: 99px;
+  border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -345,42 +399,189 @@ main {
   opacity: 0;
 }
 
+/* Mobile Styles */
+@media (max-width: 968px) {
+  .desktop-nav {
+    display: none;
+  }
 
-.user-link {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  .mobile-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
 
-  text-decoration: none;
-  color: inherit;
+  .icon-link {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--color-rose-light);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-rose-dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .icon-link:hover,
+  .icon-link.active {
+    background: var(--color-rose);
+    color: white;
+    border-color: var(--color-rose);
+  }
+
+  .user-avatar-mobile {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .btn-text-mobile {
+    background: none;
+    border: none;
+    color: var(--color-rose);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Mobile Menu Dropdown */
+  .mobile-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    opacity: 1;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(139, 71, 93, 0.2);
+    min-width: 200px;
+    overflow: hidden;
+    animation: slideDown 0.3s ease-out;
+    z-index: 99 !important;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile-menu-header {
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(139, 71, 93, 0.05), rgba(212, 175, 55, 0.05));
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .user-avatar-large {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .mobile-user-info {
+    flex: 1;
+  }
+
+  .mobile-user-name {
+    font-weight: 600;
+    color: var(--color-rose-dark);
+    font-size: 0.9375rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .premium-badge-mobile {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--color-gold);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .mobile-menu-divider {
+    height: 1px;
+    background: rgba(139, 71, 93, 0.1);
+  }
+
+  .mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    color: var(--color-rose-dark);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .mobile-menu-item:hover {
+    background: rgba(139, 71, 93, 0.05);
+  }
+
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 2;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  header {
+    padding: 1.5rem 1rem;
+  }
+
+  .logo {
+    font-size: 2.25rem;
+  }
+
+  .tagline {
+    font-size: 1rem;
+  }
 }
 
-
-@media (max-width: 768px) {
-  header {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .header-content {
-    margin-bottom: 1rem;
-  }
-
+@media (max-width: 480px) {
   .logo {
     font-size: 2rem;
   }
 
-  .header-actions {
-    flex-wrap: wrap;
-    justify-content: center;
+  .tagline {
+    font-size: 0.9375rem;
   }
 
-  .user-info {
-    font-size: 0.75rem;
+  .btn-primary-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
   }
-  .user-name {
-  max-width: 50px;
-}
-
 }
 </style>

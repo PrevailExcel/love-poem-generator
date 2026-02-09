@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'https://api.dearluv.ng/api/v1';// 'https://dearluv.iquest.com.ng/api/v1'; 
-// import.meta.env.VITE_API_URL || 'https://api.dearluv.ng/api/v1'
+const API_BASE_URL = 'http://127.0.0.1:8001/api/v1';// 'https://dearluv.iquest.com.ng/api/v1'; 
+// import.meta.env.VITE_API_URL || 'http://127.0.0.1:8001/api/v1'
 
 // Create axios instance
 const apiClient = axios.create({
@@ -69,6 +69,7 @@ export const api = {
     getStyles: () => apiClient.get('/poems/styles'),
     checkLimits: (anonymousId) => apiClient.post('/poems/check-limits', { anonymous_id: anonymousId }),
     get: (uuid) => apiClient.get(`/poems/${uuid}`),
+    showPublic: (uuid) => apiClient.get(`/poems/${uuid}/public`),
     list: (page = 1) => apiClient.get(`/poems?page=${page}`),
     delete: (uuid) => apiClient.delete(`/poems/${uuid}`),
     trackShare: (uuid) => apiClient.post(`/poems/${uuid}/share`),

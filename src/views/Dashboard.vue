@@ -149,9 +149,6 @@
     <!-- Paywall Modal -->
     <PaywallModal v-if="showPaywallModal" :currency="userCurrency" @close="showPaywallModal = false"
       @success="handlePaymentSuccess" />
-
-    <!-- Poem View Modal -->
-    <PoemViewModal v-if="selectedPoem" :poem="selectedPoem" @close="selectedPoem = null" />
   </div>
 </template>
 
@@ -174,7 +171,6 @@ import {
   Loader
 } from 'lucide-vue-next'
 import PaywallModal from '@/components/PaywallModal.vue'
-import PoemViewModal from '@/components/PoemViewModal.vue'
 
 const router = useRouter()
 const { loadCurrentUser, remainingGenerations } = useUser()
@@ -188,7 +184,6 @@ const loadingPayments = ref(false)
 const currentPage = ref(1)
 const pagination = ref(null)
 const showPaywallModal = ref(false)
-const selectedPoem = ref(null)
 
 const totalPoems = computed(() => pagination.value?.total || poems.value.length)
 
@@ -276,8 +271,9 @@ const unlockPoem = async (poem) => {
       }
       // Reload user data to update credits
       await loadCurrentUser()
-      // Open the poem
-      selectedPoem.value = poems.value[index]
+
+      // Navigate to the unlocked poem
+      router.push({ name: 'poem', params: { id: poem.id } })
     }
   } catch (error) {
     console.error('Failed to unlock poem:', error)
@@ -286,8 +282,9 @@ const unlockPoem = async (poem) => {
 }
 
 const viewPoem = (poem) => {
+  console.log("The full poem", poem)
   if (poem.is_unlocked) {
-    selectedPoem.value = poem
+    router.push({ name: 'poem', params: { id: poem.id } })
   } else if (remainingGenerations.value > 0) {
     unlockPoem(poem)
   } else {
