@@ -9,6 +9,9 @@ import Terms from './views/Terms.vue'
 import Dashboard from './views/Dashboard.vue'
 import { useUser } from './composables/useUser'
 import './style.css'
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
+
 
 const router = createRouter({
   history: createWebHistory(),
@@ -42,6 +45,7 @@ router.beforeEach((to, from, next) => {
 
 const app = createApp(App)
 app.use(router)
+app.use(Toast, { timeout: 3000 })
 app.mount('#app')
 
 // Initialize user tracking

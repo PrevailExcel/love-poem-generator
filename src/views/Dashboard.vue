@@ -171,7 +171,9 @@ import {
   Loader
 } from 'lucide-vue-next'
 import PaywallModal from '@/components/PaywallModal.vue'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const router = useRouter()
 const { loadCurrentUser, remainingGenerations } = useUser()
 const { poemStyles } = usePoemGenerator()
@@ -277,7 +279,7 @@ const unlockPoem = async (poem) => {
     }
   } catch (error) {
     console.error('Failed to unlock poem:', error)
-    alert('Failed to unlock poem. Please try again.')
+    toast.error('Failed to unlock poem. Please try again.')
   }
 }
 
@@ -307,7 +309,7 @@ const sharePoem = async (poem) => {
     // Fallback: copy to clipboard
     try {
       await navigator.clipboard.writeText(poem.content)
-      alert('Poem copied to clipboard!')
+      toast.success('Poem copied to clipboard!')
     } catch (error) {
       console.error('Copy failed:', error)
     }
@@ -327,7 +329,7 @@ const deletePoem = async (poem) => {
     }
   } catch (error) {
     console.error('Failed to delete poem:', error)
-    alert('Failed to delete poem. Please try again.')
+    toast.error('Failed to delete poem. Please try again.')
   }
 }
 
@@ -369,7 +371,7 @@ const handlePaymentSuccess = async (option) => {
   showPaywallModal.value = false
   // Reload user data to get updated poem count
   await loadPoems()
-  alert('Payment successful! Your poems have been added.')
+  toast.success('Payment successful! Your poems have been added.')
 }
 </script>
 

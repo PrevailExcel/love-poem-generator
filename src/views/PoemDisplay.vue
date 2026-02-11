@@ -273,7 +273,9 @@ import CopiedModal from '@/components/CopiedModal.vue'
 import LimitModal from '@/components/LimitModal.vue'
 import PaywallModal from '@/components/PaywallModal.vue'
 import html2canvas from 'html2canvas'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 const { 
@@ -401,18 +403,18 @@ const loadPoemById = async (poemId) => {
       }
     } else {
       // Poem not found
-      alert(response.data.message || 'Poem not found')
+      toast.info(response.data.message || 'Poem not found')
       router.push('/')
     }
   } catch (error) {
     console.error('Failed to load poem:', error)
     
     if (error.response?.status === 404) {
-      alert('This poem does not exist or has been deleted.')
+      toast.info('This poem does not exist or has been deleted.')
     } else if (error.response?.status === 403) {
-      alert('You do not have permission to view this poem.')
+      toast.info('You do not have permission to view this poem.')
     } else {
-      alert('Failed to load poem. Please try again.')
+      toast.info('Failed to load poem. Please try again.')
     }
     
     router.push(isPublicShare.value ? '/' : '/dashboard')
@@ -487,7 +489,7 @@ const canViewFullPoem = computed(() => {
 
 
 const handlePurchaseComplete = async () => {
-  alert('Thank you for your purchase! Unlocking your poem now...')
+  toast.success('Thank you for your purchase! Unlocking your poem now...')
   showPaywallModal.value = false
   await loadCredits()
   await autoUnlock()
@@ -621,7 +623,7 @@ const shareAsImage = async () => {
     }, 'image/png')
   } catch (error) {
     console.error('Failed to generate image:', error)
-    alert('Failed to generate image. Please try again.')
+    toast.info('Failed to generate image. Please try again.')
   }
 }
 

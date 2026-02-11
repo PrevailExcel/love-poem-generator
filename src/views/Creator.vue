@@ -34,6 +34,7 @@ import StepDetails from '@/components/StepDetails.vue'
 import StepPhoto from '@/components/StepPhoto.vue'
 import StepStyle from '@/components/StepStyle.vue'
 import PremiumModal from '@/components/PremiumModal.vue'
+import { useToast } from 'vue-toastification'
 
 const router = useRouter()
 const { 
@@ -47,6 +48,8 @@ const {
   checkLimits 
 } = useUser()
 const { generatePoem } = usePoemGenerator()
+
+const toast = useToast()
 
 const currentStep = ref(1)
 const showPremiumModal = ref(false)
@@ -118,12 +121,12 @@ const handleGenerate = async () => {
       router.push('/poem')
     } else {
       // Generic error
-      alert(result.error || 'Failed to generate poem. Please try again.')
+      toast.info(result.error ||   "Even love needs a moment to catch its breath. It’ll work — just try again now.")
       router.push('/create')
     }
   } catch (error) {
     console.error('Failed to generate poem:', error)
-    alert('An unexpected error occurred. Please try again.')
+    toast.error('An unexpected error occurred. Please try again.')
     router.push('/create')
   }
 }
