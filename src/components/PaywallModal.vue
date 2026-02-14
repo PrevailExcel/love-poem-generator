@@ -133,10 +133,11 @@ const handlePurchase = async () => {
     }
 
     const handler = window.PaystackPop.setup({
-      key: 'pk_test_ba37554cd01d1ad9b23140c09e11f9d1ff98b9ad', //import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      key: 'pk_live_d5bf1502d1c9a2dc2579dc95a98a89be47412a85', //import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
       email: data.email || currentUser?.email || 'anonymous@dearluv.app',
       amount: amount * 100,
       currency: 'NGN',
+      channels: ['bank', 'card', 'ussd'],
       ref: data.reference,
       metadata: {
         app: 'dearluv',
