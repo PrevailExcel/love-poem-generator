@@ -138,12 +138,22 @@ const handlePurchase = async () => {
       amount: amount * 100,
       currency: 'NGN',
       ref: data.reference,
-
+      metadata: {
+        app: 'dearluv',
+        user_id: currentUser?.id || null,
+        custom_fields: [
+          {
+            display_name: "Application",
+            variable_name: "app",
+            value: "dearluv"
+          }
+        ]
+      },
       callback(response) {
         (async () => {
           try {
 
-        console.log('Payment callback', response)
+            console.log('Payment callback', response)
             const res = await api.payments.verifyPayment({
               reference: response.reference,
               anonymous_id: currentUser?.id || anonymousUserId.value,
