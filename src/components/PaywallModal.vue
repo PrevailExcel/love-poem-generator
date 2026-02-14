@@ -137,7 +137,6 @@ const handlePurchase = async () => {
       email: data.email || currentUser?.email || 'anonymous@dearluv.app',
       amount: amount * 100,
       currency: 'NGN',
-      channels: ['bank', 'card', 'ussd'],
       ref: data.reference,
       metadata: {
         app: 'dearluv',
