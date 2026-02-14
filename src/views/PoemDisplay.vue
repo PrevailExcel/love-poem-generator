@@ -207,8 +207,8 @@
         <button class="action-btn action-btn-primary tooltip-trigger" @click="shareAsImage">
           <Share2 :size="20" :stroke-width="2" />
           Share as Image
-          <span class="tooltip">{{ usePhotoBackground && !isPremium ? '⭐ Premium Feature' : 'Share this poem ❤️'
-            }}</span>
+          <span class="tooltip">Share this poem ❤️
+            </span>
         </button>
         <button class="action-btn tooltip-trigger" @click="copyLink">
           <Link :size="20" :stroke-width="2" />
@@ -589,15 +589,15 @@ const shareAsImage = async () => {
     return
   }
 
-  if (usePhotoBackground.value && !isPremium.value) {
-    copiedMessage.value = '⭐ Upgrade to Premium'
-    showCopiedModal.value = true
-    setTimeout(() => {
-      showCopiedModal.value = false
-      showSaveModal.value = true
-    }, 2000)
-    return
-  }
+  // if (usePhotoBackground.value && !isPremium.value) {
+  //   copiedMessage.value = '⭐ Upgrade to Premium'
+  //   showCopiedModal.value = true
+  //   setTimeout(() => {
+  //     showCopiedModal.value = false
+  //     showSaveModal.value = true
+  //   }, 2000)
+  //   return
+  // }
 
   try {
     const canvas = await generateImage()
